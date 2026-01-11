@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-01-12)
 
 Phase: 5 of 5 (새 CLI 통합)
 Plan: Not started
-Status: Ready to plan
+Status: Research complete
 Last activity: 2026-01-12 — v1.1 마일스톤 추가
 
 Progress: ████████░░ 80%
@@ -56,7 +56,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 5]: Gemini, Qwen, Rovodev CLI 설치 여부 및 사용법 조사 필요
+- [Phase 5]: ~~Gemini, Qwen, Rovodev CLI 조사 필요~~ → 완료
+- [Phase 5]: Rovo Dev CLI 제외 권장 (non-interactive only, Atlassian 종속)
 
 ## Session Continuity
 
