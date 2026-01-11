@@ -12,6 +12,7 @@
  */
 import { spawnSync, SpawnSyncReturns } from "node:child_process";
 import { extractResult, type NormalizedResult } from "./result-extractor.ts";
+import { selectCLI, explainRouting } from "./router.ts";
 
 // ============================================================================
 // Types
@@ -172,17 +173,29 @@ function runCLI(config: CLIConfig, prompt: string): RunResult {
 // CLI Interface
 // ============================================================================
 
-function parseArgs(argv: string[]): { cli: string; prompt: string; normalize: boolean } {
-  const args = { cli: "echo", prompt: "", normalize: false };
+interface ParsedArgs {
+  cli: string;
+  prompt: string;
+  normalize: boolean;
+  auto: boolean;
+  testMode: boolean;
+}
+
+function parseArgs(argv: string[]): ParsedArgs {
+  const args: ParsedArgs = { cli: "", prompt: "", normalize: false, auto: false, testMode: false };
 
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--cli" || a === "-c") {
-      args.cli = argv[++i] ?? "echo";
+      args.cli = argv[++i] ?? "";
     } else if (a === "--prompt" || a === "-p") {
       args.prompt = argv[++i] ?? "";
     } else if (a === "--normalize" || a === "-n") {
       args.normalize = true;
+    } else if (a === "--auto" || a === "-a") {
+      args.auto = true;
+    } else if (a === "--test") {
+      args.testMode = true;
     } else if (a === "--help" || a === "-h") {
       printHelp();
       process.exit(0);
@@ -195,6 +208,15 @@ function parseArgs(argv: string[]): { cli: string; prompt: string; normalize: bo
     console.error("Error: Missing prompt. Use --prompt or provide as argument.");
     printHelp();
     process.exit(1);
+  }
+
+  // Auto mode: 라우터가 CLI 선택
+  if (args.auto) {
+    const routing = selectCLI({ prompt: args.prompt, options: { testMode: args.testMode } });
+    args.cli = routing.cli;
+    console.error(`[Router] ${explainRouting(routing)}`);
+  } else if (!args.cli) {
+    args.cli = "echo"; // 기본값
   }
 
   if (!CLI_CONFIGS[args.cli]) {
@@ -211,18 +233,21 @@ Multi-CLI Runner - Execute AI CLIs and collect results
 
 Usage:
   node --import tsx multi-cli-runner.ts --cli <name> --prompt "<prompt>"
-  node --import tsx multi-cli-runner.ts --cli <name> "<prompt>"
+  node --import tsx multi-cli-runner.ts --auto "<prompt>"
 
 Options:
   --cli, -c <name>       CLI to use: ${Object.keys(CLI_CONFIGS).join(", ")}
   --prompt, -p <prompt>  Prompt to send to CLI
+  --auto, -a             Auto-select CLI based on prompt content
+  --test                 Enable test mode (routes to echo)
   --normalize, -n        Output normalized result format
   -h, --help             Show this help
 
 Examples:
   node --import tsx multi-cli-runner.ts --cli echo "hello world"
-  node --import tsx multi-cli-runner.ts --cli claude --prompt "say hello"
-  node --import tsx multi-cli-runner.ts --cli echo "test" --normalize
+  node --import tsx multi-cli-runner.ts --auto "write a function"
+  node --import tsx multi-cli-runner.ts --auto --test "any prompt"
+  node --import tsx multi-cli-runner.ts --auto "hello" --normalize
 `.trim());
 }
 
