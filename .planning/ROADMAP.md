@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** - Phases 1-4 (shipped 2026-01-12)
-- 🚧 **v1.1 CLI 확장** - Phase 5 (in progress)
+- ✅ **v1.1 CLI 확장** - Phase 5 (shipped 2026-01-12)
 
 ## Overview
 
@@ -65,25 +65,22 @@ Plans:
 
 </details>
 
-### 🚧 v1.1 CLI 확장 (In Progress)
+<details>
+<summary>✅ v1.1 CLI 확장 (Phase 5) - SHIPPED 2026-01-12</summary>
 
 **Milestone Goal:** 추가 AI CLI 지원으로 라우팅 옵션 확장
 
-- [ ] **Phase 5: 새 CLI 통합** - Gemini, Qwen, Rovodev CLI 지원 추가
-
-## Phase Details
+- [x] **Phase 5: 새 CLI 통합** - Gemini, Qwen CLI 지원 추가 (Rovo Dev 제외)
 
 ### Phase 5: 새 CLI 통합
-**Goal**: Gemini, Qwen, Rovodev CLI를 multi-cli-runner에 추가하고 라우팅 규칙 확장
+**Goal**: Gemini, Qwen CLI를 multi-cli-runner에 추가하고 라우팅 규칙 확장
 **Depends on**: Phase 4
-**Research**: Likely (각 CLI 사용법, 출력 형식 조사 필요)
-**Research topics**: Gemini CLI 설치/사용법, Qwen CLI 인터페이스, Rovodev CLI 문서, 각 CLI 출력 JSON 형식
-**Plans**: TBD
+**Research**: Complete (Rovo Dev는 non-interactive only로 제외)
 
 Plans:
-- [ ] 05-01: CLI 조사 및 설정 추가
-- [ ] 05-02: 결과 추출기(result-extractor) 확장
-- [ ] 05-03: 라우팅 규칙 및 키워드 추가
+- [x] 05-01: CLI 설정 및 라우팅 규칙 추가
+
+</details>
 
 ## Progress
 
@@ -96,4 +93,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. 결과 수집 검증 | v1.0 | 1/1 | Complete | 2026-01-12 |
 | 3. 라우팅 로직 | v1.0 | 1/1 | Complete | 2026-01-12 |
 | 4. 플러그인 통합 | v1.0 | 1/1 | Complete | 2026-01-12 |
-| 5. 새 CLI 통합 | v1.1 | 0/3 | Not started | - |
+| 5. 새 CLI 통합 | v1.1 | 1/1 | Complete | 2026-01-12 |

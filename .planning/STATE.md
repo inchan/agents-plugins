@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-12)
 ## Current Position
 
 Phase: 5 of 5 (새 CLI 통합)
-Plan: Not started
-Status: Research complete
-Last activity: 2026-01-12 — v1.1 마일스톤 추가
+Plan: 1 of 1 complete
+Status: Phase complete
+Last activity: 2026-01-12 — Completed 05-01-PLAN.md
 
-Progress: ████████░░ 80%
+Progress: ██████████ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 5 min
-- Total execution time: 0.35 hours
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: ████████░░ 80%
 | 2. 결과 수집 검증 | 1 | 6min | 6min |
 | 3. 라우팅 로직 | 1 | 4min | 4min |
 | 4. 플러그인 통합 | 1 | 3min | 3min |
+| 5. 새 CLI 통합 | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 8min, 6min, 4min, 3min
+- Last 5 plans: 8min, 6min, 4min, 3min, 2min
 - Trend: ↓ improving
 
 ## Accumulated Context
@@ -49,6 +50,8 @@ Recent decisions affecting current work:
 - [Phase 2]: 에러 복구 가능성(recoverable) 분류로 라우팅 로직 지원
 - [Phase 3]: 우선순위 기반 라우팅 규칙 (priority 높을수록 먼저 평가)
 - [Phase 4]: SKILL.md + commands/route.md 구조로 플러그인 완성
+- [Phase 5]: Rovo Dev CLI 제외 (non-interactive only, Atlassian 종속)
+- [Phase 5]: Qwen CLI 180s 타임아웃 (480B 모델 지연 대비)
 
 ### Deferred Issues
 
@@ -56,11 +59,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 5]: ~~Gemini, Qwen, Rovodev CLI 조사 필요~~ → 완료
-- [Phase 5]: Rovo Dev CLI 제외 권장 (non-interactive only, Atlassian 종속)
+None - v1.1 마일스톤 완료
 
 ## Session Continuity
 
-Last session: 2026-01-12 02:35
-Stopped at: v1.1 마일스톤 정의 완료, Phase 5 준비
+Last session: 2026-01-12 02:52
+Stopped at: v1.1 마일스톤 완료 (Phase 5 complete)
 Resume file: None
