@@ -17,7 +17,7 @@ None
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: CLI 실행 검증** - 서브에이전트에서 외부 AI CLI 실행 가능 여부 검증
-- [ ] **Phase 2: 결과 수집 검증** - CLI 실행 결과를 서브에이전트가 수집하는 구조 검증
+- [x] **Phase 2: 결과 수집 검증** - CLI 실행 결과를 서브에이전트가 수집하는 구조 검증
 - [ ] **Phase 3: 라우팅 로직** - 자연어에서 적절한 AI를 선택하는 로직 구현
 - [ ] **Phase 4: 플러그인 통합** - Skill + Sub-agent + Command 구조로 통합
 
@@ -40,7 +40,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: stdout/stderr 캡처 및 파싱
+- [x] 02-01: stdout/stderr 캡처 및 파싱
 
 ### Phase 3: 라우팅 로직
 **Goal**: 자연어 요청을 분석하여 적절한 AI를 선택하는 로직 구현
@@ -70,6 +70,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. CLI 실행 검증 | 1/1 | Complete | 2026-01-12 |
-| 2. 결과 수집 검증 | 0/1 | Not started | - |
+| 2. 결과 수집 검증 | 1/1 | Complete | 2026-01-12 |
 | 3. 라우팅 로직 | 0/2 | Not started | - |
 | 4. 플러그인 통합 | 0/1 | Not started | - |
