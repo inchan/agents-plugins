@@ -61,6 +61,18 @@ const CREATIVE_KEYWORDS = [
   '작성', '생성', '만들어', '써줘',
 ];
 
+const GOOGLE_KEYWORDS = [
+  'google', 'gmail', 'drive', 'sheets', 'docs', 'calendar',
+  'gemini', 'vertex', 'firebase', 'gcp',
+  '구글', '지메일', '드라이브', '시트', '캘린더',
+];
+
+const MULTILINGUAL_KEYWORDS = [
+  'translate', 'translation', 'chinese', 'mandarin', 'korean',
+  '번역', '중국어', '한국어', '다국어', 'multilingual',
+  'qwen', 'alibaba',
+];
+
 // ============================================================================
 // Utility Functions
 // ============================================================================
@@ -102,6 +114,26 @@ export const DEFAULT_RULES: RoutingRule[] = [
     target: 'codex',
     fallback: 'claude',
     description: '코드 관련 작업은 codex로 라우팅',
+  },
+
+  // Google 관련 작업 - gemini 우선
+  {
+    name: 'google-tasks',
+    priority: 85,
+    match: (req) => containsKeyword(req.prompt, GOOGLE_KEYWORDS),
+    target: 'gemini',
+    fallback: 'claude',
+    description: 'Google 관련 작업은 gemini로 라우팅',
+  },
+
+  // 다국어/번역 작업 - qwen 우선
+  {
+    name: 'multilingual-tasks',
+    priority: 85,
+    match: (req) => containsKeyword(req.prompt, MULTILINGUAL_KEYWORDS),
+    target: 'qwen',
+    fallback: 'claude',
+    description: '다국어/번역 작업은 qwen으로 라우팅',
   },
 
   // 속도 우선 옵션
