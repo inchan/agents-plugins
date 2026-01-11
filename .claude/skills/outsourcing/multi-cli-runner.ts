@@ -82,6 +82,17 @@ const CLI_CONFIGS: Record<string, CLIConfig> = {
     timeout: 120000,
   },
 
+  gemini: {
+    name: "gemini",
+    command: "gemini",
+    buildArgs: (prompt: string) => [
+      "-p", prompt,
+      "--output-format", "json"
+    ],
+    parseOutput: safeJsonParse,
+    timeout: 120000,
+  },
+
   // Echo mock for testing without AI CLIs
   echo: {
     name: "echo",
