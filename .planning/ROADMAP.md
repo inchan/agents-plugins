@@ -49,8 +49,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: AI 선택 로직 구현
-- [ ] 03-02: 라우팅 규칙 설정
+- [x] 03-01: AI 선택 로직 구현
+- [ ] 03-02: 라우팅 규칙 설정 (deferred - 기본 규칙으로 충분)
 
 ### Phase 4: 플러그인 통합
 **Goal**: Skill + Sub-agent + Command + Hook 구조로 완성된 플러그인 통합
@@ -71,5 +71,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. CLI 실행 검증 | 1/1 | Complete | 2026-01-12 |
 | 2. 결과 수집 검증 | 1/1 | Complete | 2026-01-12 |
-| 3. 라우팅 로직 | 0/2 | Not started | - |
+| 3. 라우팅 로직 | 1/1 | Complete | 2026-01-12 |
 | 4. 플러그인 통합 | 0/1 | Not started | - |
