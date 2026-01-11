@@ -11,6 +11,7 @@
  *   node --import tsx multi-cli-runner.ts --cli echo --prompt "test message"
  */
 import { spawnSync, SpawnSyncReturns } from "node:child_process";
+import { extractResult, type NormalizedResult } from "./result-extractor.ts";
 
 // ============================================================================
 // Types
@@ -88,6 +89,15 @@ const CLI_CONFIGS: Record<string, CLIConfig> = {
     parseOutput: (stdout: string) => ({ echoed: stdout.trim() }),
     timeout: 5000,
   },
+
+  // Fake CLI for error testing
+  fake: {
+    name: "fake",
+    command: "nonexistent-cli-for-testing",
+    buildArgs: (prompt: string) => [prompt],
+    parseOutput: (stdout: string) => ({ result: stdout.trim() }),
+    timeout: 5000,
+  },
 };
 
 // ============================================================================
@@ -162,8 +172,8 @@ function runCLI(config: CLIConfig, prompt: string): RunResult {
 // CLI Interface
 // ============================================================================
 
-function parseArgs(argv: string[]): { cli: string; prompt: string } {
-  const args = { cli: "echo", prompt: "" };
+function parseArgs(argv: string[]): { cli: string; prompt: string; normalize: boolean } {
+  const args = { cli: "echo", prompt: "", normalize: false };
 
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -171,6 +181,8 @@ function parseArgs(argv: string[]): { cli: string; prompt: string } {
       args.cli = argv[++i] ?? "echo";
     } else if (a === "--prompt" || a === "-p") {
       args.prompt = argv[++i] ?? "";
+    } else if (a === "--normalize" || a === "-n") {
+      args.normalize = true;
     } else if (a === "--help" || a === "-h") {
       printHelp();
       process.exit(0);
@@ -204,24 +216,31 @@ Usage:
 Options:
   --cli, -c <name>       CLI to use: ${Object.keys(CLI_CONFIGS).join(", ")}
   --prompt, -p <prompt>  Prompt to send to CLI
+  --normalize, -n        Output normalized result format
   -h, --help             Show this help
 
 Examples:
   node --import tsx multi-cli-runner.ts --cli echo "hello world"
   node --import tsx multi-cli-runner.ts --cli claude --prompt "say hello"
-  node --import tsx multi-cli-runner.ts --cli codex --prompt "list files"
+  node --import tsx multi-cli-runner.ts --cli echo "test" --normalize
 `.trim());
 }
 
 function main() {
-  const { cli, prompt } = parseArgs(process.argv.slice(2));
+  const { cli, prompt, normalize } = parseArgs(process.argv.slice(2));
   const config = CLI_CONFIGS[cli];
 
   const result = runCLI(config, prompt);
 
-  // Output as JSON for integration
-  process.stdout.write(JSON.stringify(result, null, 2) + "\n");
-  process.exit(result.ok ? 0 : 1);
+  // Output as JSON - normalized or raw
+  if (normalize) {
+    const normalized = extractResult(result);
+    process.stdout.write(JSON.stringify(normalized, null, 2) + "\n");
+    process.exit(normalized.success ? 0 : 1);
+  } else {
+    process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+    process.exit(result.ok ? 0 : 1);
+  }
 }
 
 main();
