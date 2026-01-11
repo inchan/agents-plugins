@@ -93,6 +93,14 @@ const CLI_CONFIGS: Record<string, CLIConfig> = {
     timeout: 120000,
   },
 
+  qwen: {
+    name: "qwen",
+    command: "qwen",
+    buildArgs: (prompt: string) => ["-p", prompt],
+    parseOutput: (stdout: string) => ({ content: stdout.trim() }),
+    timeout: 180000, // 3 minutes - 480B model may be slower
+  },
+
   // Echo mock for testing without AI CLIs
   echo: {
     name: "echo",
