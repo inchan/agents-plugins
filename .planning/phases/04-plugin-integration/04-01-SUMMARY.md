@@ -17,12 +17,13 @@
 
 ```
 lab-workflow-spec-kit/
-├── SKILL.md              # 플러그인 정의
-├── commands/
-│   └── route.md          # /route 커맨드
-├── router.ts             # 라우팅 로직
-├── multi-cli-runner.ts   # CLI 실행
-└── result-extractor.ts   # 결과 정규화
+└── .claude/skills/
+    ├── SKILL.md              # 플러그인 정의
+    ├── commands/
+    │   └── route.md          # /route 커맨드
+    ├── router.ts             # 라우팅 로직
+    ├── multi-cli-runner.ts   # CLI 실행
+    └── result-extractor.ts   # 결과 정규화
 ```
 
 ## Verification Results
