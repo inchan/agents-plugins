@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-12)
 
 **Core value:** 자연어 → 적절한 AI로 자동 라우팅
-**Current focus:** Project Complete
+**Current focus:** Phase 5 — 새 CLI 통합
 
 ## Current Position
 
-Phase: 4 of 4 (플러그인 통합)
-Plan: 1 of 1 in current phase
-Status: Milestone complete
-Last activity: 2026-01-12 — Completed 04-01-PLAN.md
+Phase: 5 of 5 (새 CLI 통합)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-01-12 — v1.1 마일스톤 추가
 
-Progress: ██████████ 100%
+Progress: ████████░░ 80%
 
 ## Performance Metrics
 
@@ -48,7 +48,6 @@ Recent decisions affecting current work:
 - [Phase 2]: NormalizedResult 구조로 모든 CLI 결과 통일
 - [Phase 2]: 에러 복구 가능성(recoverable) 분류로 라우팅 로직 지원
 - [Phase 3]: 우선순위 기반 라우팅 규칙 (priority 높을수록 먼저 평가)
-- [Phase 3]: 03-02 라우팅 규칙 확장은 현재 규칙으로 충분하여 deferred
 - [Phase 4]: SKILL.md + commands/route.md 구조로 플러그인 완성
 
 ### Deferred Issues
@@ -57,10 +56,10 @@ None yet.
 
 ### Blockers/Concerns
 
-None yet.
+- [Phase 5]: Gemini, Qwen, Rovodev CLI 설치 여부 및 사용법 조사 필요
 
 ## Session Continuity
 
-Last session: 2026-01-12 02:30
-Stopped at: Milestone complete - all phases done
+Last session: 2026-01-12 02:35
+Stopped at: v1.1 마일스톤 정의 완료, Phase 5 준비
 Resume file: None
