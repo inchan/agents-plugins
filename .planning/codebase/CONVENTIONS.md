@@ -1,152 +1,79 @@
-# 코딩 컨벤션
+# Coding Conventions
 
-## 코드 스타일
+**Analysis Date:** 2026-01-14
 
-### 인덴테이션
-- **스타일**: 2칸 스페이스 (Space 2)
-- **탭**: 사용 안 함
+## Naming Patterns
 
-### 따옴표
-- **문자열**: 이중 따옴표 (`"`) 선호
-- **예외**: 작은 따옴표도 일부 사용됨 (일관성 개선 필요)
+**Files:**
+- `kebab-case.md` for Plugin/Command definitions (e.g., `delegate.md`, `delegate-runner.md`)
+- `snake_case.py` for Python scripts (e.g., `agent.py`)
+- `kebab-case.json` for configurations (e.g., `plugin.json`)
+- `UPPERCASE.md` for documentation and special files (`README.md`, `SKILL.md`)
 
-### 세미콜론
-- **규칙**: 모든 문장 끝에 세미콜론 필수
+**Functions (Python):**
+- `snake_case` for function names (e.g., `def main():`)
+- `snake_case` for variables (e.g., `cmd`, `cli`)
 
-### 라인 길이
-- **최대**: 약 100-120자 (엄격한 제한 없음)
+**Constants:**
+- `UPPER_SNAKE_CASE` for global constants (e.g., `CLIS`)
 
-## 명명 규칙
+**Directories:**
+- `kebab-case` for feature modules (e.g., `subagent-dispatch`)
+- Plural nouns for collections (e.g., `commands`, `agents`, `skills`)
 
-### 파일명
-```
-kebab-case.ts          # TypeScript 파일
-UPPER_CASE.md          # 주요 문서
-lower-case.md          # 커맨드 정의
-```
+## Code Style
 
-### 변수/함수
-```typescript
-const lowerCamelCase = "value";     // 변수
-function lowerCamelCase() {}        // 함수
-const UPPER_SNAKE_CASE = [];        // 상수 배열/설정
-```
+**Python:**
+- **Indentation:** 4 spaces
+- **Quotes:** Double quotes (`"`) preferred
+- **Structure:**
+  1. Shebang
+  2. Docstring
+  3. Imports (Standard library first)
+  4. Global Constants
+  5. Functions
+  6. `if __name__ == "__main__":` block
+- **Minimalism:** Use standard libraries only (`subprocess`, `json`, `sys`, `os`, `time`) to avoid external dependencies.
 
-### 타입/인터페이스
-```typescript
-interface PascalCase {}             // 인터페이스
-type PascalCase = {};               // 타입
-```
+**Markdown/Documentation:**
+- **Language:** Korean preferred for documentation and descriptions.
+- **Frontmatter:** YAML frontmatter required for Plugin definition files.
 
-## 함수 패턴
+## Import Organization
 
-### 타입 정의
-```typescript
-// 공용 (export)
-export interface RoutingRequest {
-  prompt: string;
-  options?: { ... };
-}
+**Python:**
+- Standard library imports at the top.
+- Multiple imports per line allowed for brevity in this specific project (e.g., `import subprocess, json...`).
 
-// 내부 (no export)
-interface CLIConfig {
-  name: string;
-  command: string;
-}
-```
+## Error Handling
 
-### Union Types
-```typescript
-type CheckResult =
-  | { type: "fileExists"; path: string; ok: boolean }
-  | { type: "regex"; path: string; pattern: string; ok: boolean };
-```
+**Strategy:**
+- Capture all exceptions in the main execution block.
+- Return JSON object with `ok: false` and `error` field.
+- Do not crash the process; always output valid JSON to stdout if possible.
 
-### 기본값 처리
-```typescript
-export function selectCLI(
-  request: RoutingRequest,
-  rules: RoutingRule[] = DEFAULT_RULES  // 기본값
-): RoutingResult
-```
+## Logging
 
-### 옵셔널 체이닝
-```typescript
-sessionId = rawJson?.session_id ?? rawJson?.sessionId;
-const usage = parsed.usage ? { ... } : undefined;
-```
+**Output Format:**
+- **Standard Output (stdout):** Strictly for the final JSON result.
+- **Standard Error (stderr):** For debug logs or error messages from subprocesses.
 
-## 에러 처리
+## Comments
 
-### Try-catch with 기본값
-```typescript
-try {
-  content = readFileSync(path, "utf-8");
-} catch {
-  checks.push({ ... });
-  continue;
-}
-```
+**Docstrings:**
+- Module-level docstring required at top of script.
 
-### Safe 래퍼 함수
-```typescript
-function safeJsonParse(maybeJson: string) {
-  const first = maybeJson.indexOf("{");
-  if (first === -1) throw new Error("...");
-  return JSON.parse(slice);
-}
-```
+**Documentation:**
+- `README.md` required at project root and plugin root.
 
-## 문서화
+## Module Design
 
-### 파일 헤더
-```typescript
-/**
- * filename.ts
- * - 한 줄 설명
- * - 다른 기능
- * - 사용 방법
- */
-```
+**Single Responsibility:**
+- `agent.py` handles execution only.
+- `delegate.md` handles user interface only.
+- `delegate-runner.md` handles orchestration only.
 
-### 섹션 분리
-```typescript
-// ============================================================================
-// Types
-// ============================================================================
+---
 
-// ============================================================================
-// Utility Functions
-// ============================================================================
-```
-
-### 인라인 주석
-```typescript
-// 우선순위 내림차순 정렬
-const sortedRules = [...rules].sort((a, b) => b.priority - a.priority);
-```
-
-## 한글/영문 혼용
-
-- **코드 주석**: 한글 + 영문 혼용
-- **문서**: 한글 우선
-- **키워드 배열**: 영문 + 한글 모두 포함
-  ```typescript
-  const CODE_KEYWORDS = [
-    'function', 'class', 'code',  // 영문
-    '코드', '함수', '클래스',      // 한글
-  ];
-  ```
-
-## 린팅/포맷팅
-
-**현재 상태**: 설정 파일 없음
-- ESLint: 미설정
-- Prettier: 미설정
-- tsconfig.json: 미설정
-
-**추론된 컨벤션** (코드에서 일관됨):
-- 2칸 스페이스
-- 이중 따옴표
-- 세미콜론 필수
-- camelCase/PascalCase 일관성
+*Convention analysis: 2026-01-14*
+*Update when patterns change*

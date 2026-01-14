@@ -1,189 +1,66 @@
-# 외부 통합
+# External Integrations
 
-## AI CLI 통합
+**Analysis Date:** 2026-01-14
 
-### Claude Code CLI
+## APIs & External Services
 
-**명령어**: `claude -p <prompt> --output-format json`
+**AI CLI Tools (Primary Integration):**
+- **Claude CLI** - General purpose orchestration
+  - Integration: `subprocess.run(["claude", ...])`
+  - Auth: System authentication (relies on host `claude login`)
+  - File: `subagent-dispatch/scripts/agent.py`
 
-**설정** (multi-cli-runner.ts:63-72):
-```typescript
-{
-  name: "claude",
-  command: "claude",
-  buildArgs: (prompt) => [
-    "-p", prompt,
-    "--output-format", "json",
-    "--verbose"
-  ],
-  parseOutput: safeJsonParse,
-  timeout: 120000  // 2분
-}
-```
+- **Codex CLI (Cursor)** - Complex reasoning
+  - Integration: `subprocess.run(["codex", ...])`
+  - Auth: System authentication (`danger-full-access` flag used)
+  - File: `subagent-dispatch/scripts/agent.py`
 
-**출력 형식**:
-```json
-{
-  "session_id": "...",
-  "result": "응답 내용",
-  "usage": {
-    "input_tokens": 100,
-    "output_tokens": 50
-  },
-  "cost_usd": 0.001,
-  "duration_ms": 3000
-}
-```
+- **Gemini CLI** - Web search, visual analysis
+  - Integration: `subprocess.run(["gemini", ...])`
+  - Auth: `GEMINI_API_KEY` or OAuth (implied by CLI usage)
+  - File: `subagent-dispatch/scripts/agent.py`
 
-### Codex CLI (OpenAI)
+- **Qwen CLI** - Multilingual, translation
+  - Integration: `subprocess.run(["qwen", ...])`
+  - Auth: `OPENAI_API_KEY` (implied for compatible API)
+  - File: `subagent-dispatch/scripts/agent.py`
 
-**명령어**: `codex exec <prompt>`
+- **Echo CLI** - Testing
+  - Integration: `subprocess.run(["echo", ...])`
+  - Purpose: Mocking for tests
 
-**설정** (multi-cli-runner.ts:75-83):
-```typescript
-{
-  name: "codex",
-  command: "codex",
-  buildArgs: (prompt) => ["exec", prompt],
-  parseOutput: safeJsonParse,
-  timeout: 120000  // 2분
-}
-```
+## Data Storage
 
-### Echo Mock
+**Filesystem:**
+- Local filesystem access via CLI tools
+- No external database connected directly
 
-**명령어**: 내장 mock (CLI 호출 없음)
+## Authentication & Identity
 
-**설정** (multi-cli-runner.ts:86-92):
-```typescript
-{
-  name: "echo",
-  command: "echo",
-  buildArgs: (prompt) => [],
-  parseOutput: (stdout) => ({ echoed: stdout }),
-  timeout: 5000  // 5초
-}
-```
+**Method:**
+- Relies on pre-authenticated CLI tools in the host environment
+- No internal auth management code in the plugin itself
 
-**용도**: 테스트 모드, AI CLI 없이 라우팅 검증
+## Monitoring & Observability
 
-## Claude Code 플러그인 시스템
+**Logging:**
+- Standard Output (stdout) - JSON formatted results captured by agent
+- Standard Error (stderr) - Error messages captured
+- Integration: Captured by `subprocess` in `agent.py`
 
-### Skill 등록
+## CI/CD & Deployment
 
-**위치**: `.claude-plugin/plugin.json`
+**Hosting:**
+- Local execution as Claude Code Plugin
 
-```json
-{
-  "name": "lab-workflow-spec-kit",
-  "version": "1.0.0",
-  "description": "자연어 요청을 분석하여 가장 적절한 AI CLI로 자동 라우팅하는 플러그인",
-  "skills": ["../.claude/skills/outsourcing/"],
-  "commands": ["../.claude/commands/"]
-}
-```
+## Environment Configuration
 
-### Sub-agent 정의
+**Development:**
+- Required CLIs must be installed and on PATH
+- Python 3 required
+- API keys for specific CLIs (Gemini, Qwen) must be set in host environment
 
-**위치**: `.claude/agents/claude-cli-runner.md`
+---
 
-**역할**: `node agent.ts` 실행 및 결과 보고
-**권한**: Bash, Read 전용
-**결과 형식**: JSON 성공/실패 리포트
-
-### 권한 설정
-
-**위치**: `.claude/settings.local.json`
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Skill(gsd:plan-phase)",
-      "Skill(gsd:execute-plan)",
-      "Bash(node --import tsx:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
-    ]
-  }
-}
-```
-
-## 슬래시 커맨드
-
-### /route
-
-**위치**: `.claude/skills/outsourcing/commands/route.md`
-
-**사용법**:
-```
-/route <prompt>              # 자동 라우팅
-/route --cli claude <prompt> # 수동 지정
-/route --test <prompt>       # 테스트 모드
-```
-
-### /delegate
-
-**위치**: `.claude/commands/delegate.md`
-
-**사용법**:
-```
-/delegate <task> --expect-file <path> --expect-regex <path:regex>
-```
-
-## 통합 메커니즘
-
-### 프로세스 실행
-
-```typescript
-// multi-cli-runner.ts:115-140
-const proc = spawnSync(config.command, args, {
-  encoding: "utf-8",
-  timeout: config.timeout,
-  maxBuffer: 10 * 1024 * 1024,  // 10MB
-});
-```
-
-### 타임아웃 관리
-
-| CLI | 타임아웃 | 용도 |
-|-----|---------|------|
-| claude | 2분 | 복잡한 작업 |
-| codex | 2분 | 코드 생성 |
-| echo | 5초 | 테스트 |
-| fake | 5초 | 에러 테스트 |
-
-### 결과 버퍼
-
-```typescript
-// 출력 크기 제한
-stdout: stdout.slice(0, 5000),
-stderr: stderr.slice(0, 2000),
-```
-
-## 에러 처리
-
-### 에러 타입 분류 (result-extractor.ts)
-
-| 에러 타입 | 복구 가능 | 패턴 |
-|----------|----------|------|
-| CLI_NOT_FOUND | ❌ | `command not found`, `ENOENT` |
-| TIMEOUT | ✅ | `timeout`, `ETIMEDOUT` |
-| AUTH_ERROR | ❌ | `authentication`, `unauthorized` |
-| API_ERROR | ✅ | `api error`, `500` |
-| RATE_LIMIT | ✅ | `rate limit`, `429` |
-| PARSE_ERROR | ❌ | JSON 파싱 실패 |
-
-### 폴백 전략
-
-**라우팅 실패 시**:
-- 기본값: claude
-- 규칙별 폴백 설정 가능
-
-```typescript
-{
-  name: 'code-tasks',
-  target: 'codex',
-  fallback: 'claude',  // codex 실패 시
-}
-```
+*Integration audit: 2026-01-14*
+*Update when adding/removing external services*

@@ -1,88 +1,99 @@
-# 디렉토리 구조
+# Codebase Structure
 
-## 전체 구조
+**Analysis Date:** 2026-01-14
+
+## Directory Layout
 
 ```
-lab-workflow-spec-kit/
-├── agent.ts                          # 비대화형 Claude 실행 wrapper (207줄)
-├── package.json                      # npm 의존성 (tsx)
-├── package-lock.json                 # 의존성 잠금
-├── README.md                         # 프로젝트 설명 (한글)
-│
-├── .claude/
-│   ├── settings.local.json           # 로컬 권한 설정
-│   ├── agents/
-│   │   └── claude-cli-runner.md      # Sub-agent 정의 (Bash 실행)
-│   ├── commands/
-│   │   └── delegate.md               # /delegate 커맨드
-│   └── skills/
-│       └── outsourcing/              # Multi-Agent Router 플러그인
-│           ├── SKILL.md              # 플러그인 문서
-│           ├── router.ts             # 자연어 → CLI 선택 (247줄)
-│           ├── multi-cli-runner.ts   # CLI 실행 래퍼 (271줄)
-│           ├── result-extractor.ts   # 결과 정규화 (248줄)
-│           └── commands/
-│               └── route.md          # /route 커맨드 정의
-│
-├── .claude-plugin/
-│   └── plugin.json                   # 플러그인 메타데이터
-│
-├── .planning/
-│   ├── PROJECT.md                    # 프로젝트 개요
-│   ├── ROADMAP.md                    # 4단계 로드맵
-│   ├── STATE.md                      # 현재 상태
-│   ├── codebase/                     # 코드베이스 문서 (이 파일 포함)
-│   │   ├── STACK.md
-│   │   ├── ARCHITECTURE.md
-│   │   ├── STRUCTURE.md
-│   │   ├── CONVENTIONS.md
-│   │   ├── TESTING.md
-│   │   ├── INTEGRATIONS.md
-│   │   └── CONCERNS.md
-│   └── phases/
-│       ├── 01-cli-execution-poc/     # Phase 1: CLI 실행 검증
-│       ├── 02-result-collection/     # Phase 2: 결과 수집
-│       ├── 03-routing-logic/         # Phase 3: 라우팅 로직
-│       └── 04-plugin-integration/    # Phase 4: 플러그인 통합
-│
-└── out/                              # 데모 출력 디렉토리
+capzang-plugin/
+├── .claude-plugin/         # Plugin metadata
+├── .planning/              # Project planning & docs
+├── subagent-dispatch/      # Main plugin source
+│   ├── .claude-plugin/     # Plugin configuration
+│   ├── agents/             # Subagent definitions
+│   ├── commands/           # Slash command definitions
+│   ├── scripts/            # Execution logic (Python)
+│   └── skills/             # Skill definitions
+└── README.md               # Project documentation
 ```
 
-## 핵심 파일
+## Directory Purposes
 
-### TypeScript 소스 (973줄 총계)
+**subagent-dispatch/scripts/**
+- Purpose: Core executable logic
+- Contains: `agent.py` (Python 3)
+- Key files: `agent.py` - The single file containing all execution logic
 
-| 파일 | 줄 수 | 역할 |
-|------|-------|------|
-| `agent.ts` | 207 | 비대화형 Claude 실행, 결과 검증 |
-| `router.ts` | 247 | 자연어 분석, CLI 선택 로직 |
-| `multi-cli-runner.ts` | 271 | CLI 프로세스 실행 래퍼 |
-| `result-extractor.ts` | 248 | 결과 정규화, 에러 분류 |
+**subagent-dispatch/commands/**
+- Purpose: User-facing command interfaces
+- Contains: Markdown command definitions
+- Key files: `delegate.md` - Definition for `/delegate` command
 
-### 설정 파일
+**subagent-dispatch/agents/**
+- Purpose: Subagent configurations
+- Contains: Markdown agent definitions
+- Key files: `delegate-runner.md` - The bridge between command and script
 
-| 파일 | 용도 |
-|------|------|
-| `package.json` | npm 프로젝트 설정, 스크립트 |
-| `.claude/settings.local.json` | Claude Code 권한 설정 |
-| `.claude-plugin/plugin.json` | 플러그인 메타데이터 |
+**subagent-dispatch/skills/**
+- Purpose: Semantic triggers for automatic delegation
+- Contains: Skill definition markdown files
+- Key files: `delegation/SKILL.md` - Triggers for keywords like "codex", "gemini"
 
-### 커맨드/에이전트 정의
+**.planning/**
+- Purpose: Project management and documentation
+- Contains: Roadmap, state, and codebase maps
+- Subdirectories: `phases/`, `codebase/`
 
-| 파일 | 용도 |
-|------|------|
-| `.claude/commands/delegate.md` | /delegate 슬래시 커맨드 |
-| `.claude/skills/outsourcing/commands/route.md` | /route 슬래시 커맨드 |
-| `.claude/agents/claude-cli-runner.md` | Sub-agent 정의 |
-| `.claude/skills/outsourcing/SKILL.md` | 스킬 문서 |
+## Key File Locations
 
-## 명명 규칙
+**Entry Points:**
+- CLI Command: `subagent-dispatch/commands/delegate.md`
+- Script Entry: `subagent-dispatch/scripts/agent.py`
 
-### 파일명
-- **TypeScript**: kebab-case (`multi-cli-runner.ts`)
-- **Markdown**: 대문자 or 소문자 (`SKILL.md`, `route.md`)
-- **Planning 문서**: 단계번호-주제 (`01-01-PLAN.md`)
+**Configuration:**
+- Plugin Config: `subagent-dispatch/.claude-plugin/plugin.json`
+- Marketplace Config: `.claude-plugin/marketplace.json`
 
-### 디렉토리
-- **영문 소문자**: `.claude`, `.planning`, `skills`
-- **하이픈 구분**: `cli-execution-poc`
+**Core Logic:**
+- Execution Logic: `subagent-dispatch/scripts/agent.py`
+
+## Naming Conventions
+
+**Files:**
+- Markdown (Definitions): `kebab-case.md` (e.g., `delegate.md`, `delegate-runner.md`)
+- Special Markdown: `SKILL.md`, `README.md` (Upper case)
+- Python: `snake_case.py` (e.g., `agent.py`)
+- JSON: `kebab-case.json` (e.g., `plugin.json`)
+
+**Directories:**
+- Feature/Module: `kebab-case` (e.g., `subagent-dispatch`)
+- Collections: Plural nouns (e.g., `commands`, `agents`, `skills`, `scripts`)
+
+## Where to Add New Code
+
+**New CLI Support:**
+- Implementation: Add to `CLIS` dictionary in `subagent-dispatch/scripts/agent.py`
+- Documentation: Update `README.md`
+
+**New Command:**
+- Definition: Create new `.md` file in `subagent-dispatch/commands/`
+
+**New Skill/Trigger:**
+- Definition: Update or add `.md` file in `subagent-dispatch/skills/`
+
+## Special Directories
+
+**.claude-plugin/**
+- Purpose: Metadata for the Claude Code plugin system
+- Source: Manually maintained
+- Committed: Yes
+
+**.planning/**
+- Purpose: GSD (Get Shit Done) workflow artifacts
+- Source: Generated by GSD workflows and maintained by agents
+- Committed: Yes
+
+---
+
+*Structure analysis: 2026-01-14*
+*Update when directory structure changes*

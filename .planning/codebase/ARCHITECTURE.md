@@ -1,146 +1,102 @@
-# 아키텍처
+# Architecture
 
-## 개요
+**Analysis Date:** 2026-01-14
 
-**패턴**: 메타-에이전트 오케스트레이션 + CLI 래퍼 + 자동 라우팅
+## Pattern Overview
 
-Claude Code 플러그인 생태계 내에서 여러 외부 AI CLI(Codex, Claude 등)를 자동으로 선택하고 실행하는 메타-에이전트 시스템.
+**Overall:** Plugin-based Wrapper Architecture
 
-## 개념적 계층
+**Key Characteristics:**
+- **Proxy/Facade Pattern:** Wraps complex external CLIs into a unified interface
+- **Command-Subagent Pattern:** Uses Claude Code's native agent system for orchestration
+- **Stateless Execution:** Each execution is independent via `subprocess`
+- **Minimalist:** Core logic compressed into a single Python script
 
-```
-┌─────────────────────────────────────────┐
-│  User Interface Layer                   │
-│  - /route command (route.md)            │
-│  - Claude Code Native Interface         │
-├─────────────────────────────────────────┤
-│  Routing & Decision Layer               │
-│  - router.ts (자연어 → CLI 선택)        │
-│  - Keyword matching (영/한글)           │
-│  - Priority-based rule system           │
-├─────────────────────────────────────────┤
-│  Execution Layer                        │
-│  - multi-cli-runner.ts (CLI 실행)       │
-│  - spawnSync wrapper                    │
-│  - CLI configurations                   │
-├─────────────────────────────────────────┤
-│  Result Processing Layer                │
-│  - result-extractor.ts (정규화)         │
-│  - Error classification                 │
-│  - Format transformation                │
-├─────────────────────────────────────────┤
-│  Integration Layer                      │
-│  - agent.ts (Entry point)               │
-│  - Sub-agent orchestration              │
-│  - JSON report generation               │
-└─────────────────────────────────────────┘
-```
+## Layers
 
-## 데이터 흐름
+**User Interface Layer:**
+- Purpose: Receive user intent and route to appropriate agent
+- Contains: Command definitions, Skill triggers
+- Location: `subagent-dispatch/commands/delegate.md`, `subagent-dispatch/skills/delegation/SKILL.md`
+- Depends on: Orchestration Layer
 
-```
-User Prompt
-    ↓
-/route 커맨드
-    ↓
-multi-cli-runner.ts --auto/--cli 호출
-    ↓
-[Router] selectCLI()
-  - 키워드 분석
-  - 규칙 기반 매칭 (우선순위)
-  - 신뢰도 계산 (confidence: 0-1)
-    ↓
-선택된 CLI 실행 (runCLI)
-  - spawnSync로 프로세스 시작
-  - stdout/stderr 캡처
-  - JSON/Raw 파싱
-    ↓
-extractResult() [result-extractor.ts]
-  - CLI별 파싱 로직 적용
-  - 에러 분류 (타입 + 복구 가능성)
-  - 정규화된 JSON 생성
-    ↓
-NormalizedResult JSON 반환
-```
+**Orchestration Layer:**
+- Purpose: Manage the execution environment and report results
+- Contains: Subagent definitions
+- Location: `subagent-dispatch/agents/delegate-runner.md`
+- Depends on: Execution Layer via Bash
 
-## 핵심 추상화
+**Execution Layer:**
+- Purpose: Actual process execution and output formatting
+- Contains: Core Python logic, CLI configurations
+- Location: `subagent-dispatch/scripts/agent.py`
+- Depends on: External System Layer
 
-### 1. 라우팅 규칙 시스템 (router.ts)
+**External System Layer:**
+- Purpose: Perform the actual intelligence tasks
+- Contains: External CLI tools (`claude`, `codex`, `gemini`, `qwen`)
+- Depends on: Host system binaries
 
-**선언적 규칙 기반 라우팅**:
+## Data Flow
 
-```typescript
-interface RoutingRule {
-  name: string;              // 규칙 이름
-  priority: number;          // 우선순위 (높을수록 먼저)
-  match: (request) => boolean;  // 조건
-  target: string;            // 대상 CLI
-  fallback?: string;         // 폴백
-}
-```
+**Command Execution:**
 
-**기본 규칙 (우선순위 순)**:
-1. `test-mode` (100) → echo
-2. `code-tasks` (80) → codex
-3. `speed-priority` (70) → codex
-4. `quality-priority` (70) → claude
-5. `analysis-tasks` (60) → claude
-6. `creative-tasks` (50) → claude
-7. `default` (0) → claude
+1. **Trigger:** User runs `/delegate` or uses a keyword like "codex"
+2. **Parsing:** Claude Code parses arguments (`--cli`, `prompt`)
+3. **Dispatch:** Subagent `delegate-runner` is initialized
+4. **Execution:** Subagent runs `python3 agent.py` via Bash
+5. **Processing:** `agent.py` constructs CLI command based on configuration
+6. **Integration:** `subprocess.run` executes external CLI (e.g., `gemini -p ...`)
+7. **Normalization:** `agent.py` captures stdout/stderr and formats as JSON
+8. **Output:** Subagent reads JSON and reports result to user
 
-### 2. CLI 실행 추상화 (multi-cli-runner.ts)
+## Key Abstractions
 
-**설정 기반 CLI 래퍼**:
+**CLIS Configuration:**
+- Purpose: Define how to invoke each external tool
+- Pattern: Dictionary mapping CLI names to command argument lists
+- Location: `subagent-dispatch/scripts/agent.py`
 
-```typescript
-interface CLIConfig {
-  name: string;
-  command: string;
-  buildArgs: (prompt: string) => string[];
-  parseOutput: (stdout: string) => any;
-  timeout?: number;
-}
-```
+**Normalized Result:**
+- Purpose: Uniform output format regardless of the underlying tool
+- Pattern: JSON object with `ok`, `cli`, `result`/`error`, `durationMs`
+- Location: `subagent-dispatch/scripts/agent.py` output
 
-**지원 CLI**: claude, codex, echo (mock), fake (에러 테스트)
+## Entry Points
 
-### 3. 결과 정규화 (result-extractor.ts)
+**User Entry Point:**
+- Location: `subagent-dispatch/commands/delegate.md`
+- Triggers: `/delegate` slash command
+- Responsibilities: Parse arguments, instantiate subagent
 
-**통일된 출력 형식**:
+**Execution Entry Point:**
+- Location: `subagent-dispatch/scripts/agent.py`
+- Triggers: Called by subagent
+- Responsibilities: Validate CLI, execute subprocess, handle timeout, format output
 
-```typescript
-interface NormalizedResult {
-  success: boolean;
-  content: string;
-  metadata: {
-    cli: string;
-    sessionId?: string;
-    usage?: { inputTokens, outputTokens };
-    costUsd?: number;
-    durationMs: number;
-  };
-  error?: {
-    type: ErrorType;
-    message: string;
-    recoverable: boolean;
-  };
-}
-```
+## Error Handling
 
-## 모듈 경계
+**Strategy:** Capture-and-Report
+- Python script captures all exceptions (broad `except Exception`)
+- Returns `{"ok": false, "error": "..."}` JSON
+- Subagent displays error message to user
 
-| 모듈 | 책임 | 의존성 |
-|------|------|--------|
-| router.ts | 자연어 분석, CLI 선택 | 없음 |
-| multi-cli-runner.ts | CLI 프로세스 실행 | router.ts, result-extractor.ts |
-| result-extractor.ts | 결과 파싱, 에러 분류 | 없음 |
-| agent.ts | 비대화형 실행 wrapper | 없음 |
+**Patterns:**
+- **Timeout:** Hardcoded 599s limit to prevent hanging processes
+- **Exit Codes:** Non-zero exit codes from CLIs result in error state
+- **Fallback:** No automatic retry logic currently implemented
 
-## 설계 결정
+## Cross-Cutting Concerns
 
-| 결정 | 근거 |
-|------|------|
-| CLI 기반 실행 | API보다 설정 단순, 기존 CLI 활용 |
-| 우선순위 기반 라우팅 | 확장 가능, 선언적 규칙 |
-| JSON 정규화 | CLI별 포맷 차이 흡수 |
-| 한글 + 영문 키워드 | 사용자 편의성 |
+**Security:**
+- **Sandboxing:** Currently relies on host permissions (using flags like `--dangerously-skip-permissions`)
+- **Isolation:** Subprocesses run in current working directory
+
+**Compatibility:**
+- **Platform:** Relies on `python3` being available on PATH
+- **Dependencies:** Relies on external CLIs being installed and authenticated
+
+---
+
+*Architecture analysis: 2026-01-14*
+*Update when major patterns change*

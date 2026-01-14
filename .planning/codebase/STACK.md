@@ -1,70 +1,61 @@
-# 기술 스택
+# Technology Stack
 
-## 언어
+**Analysis Date:** 2026-01-14
 
-| 언어 | 용도 | 파일 수 |
-|------|------|---------|
-| TypeScript | 핵심 로직 | 4개 (973줄) |
-| Markdown | 문서/커맨드 정의 | 다수 |
+## Languages
 
-## 런타임
+**Primary:**
+- Python 3 - `subagent-dispatch/scripts/agent.py` - Core execution logic
+- Markdown - `subagent-dispatch/commands/*.md`, `subagent-dispatch/skills/*/SKILL.md` - Plugin definitions
 
-- **Node.js 18+** (암시적 요구사항)
-- **ES Modules** (`"type": "module"` in package.json)
+**Secondary:**
+- JSON - `plugin.json`, `marketplace.json` - Configuration
+- TypeScript - Previously used, currently removed but referenced in planning docs
 
-## 패키지 매니저
+## Runtime
 
-- **npm** (package.json + package-lock.json)
+**Environment:**
+- Node.js v18+ - Claude Code Plugin environment
+- Python 3 - Required for `agent.py` execution
 
-## 주요 의존성
+**Package Manager:**
+- npm - Used for development scripts (package.json currently deleted but referenced in docs)
 
-### 런타임 의존성
-없음 - 순수 Node.js built-in 모듈만 사용
+## Frameworks
 
-### 개발 의존성
+**Core:**
+- Claude Code Plugin Framework - Structure for Commands, Agents, Skills (`.claude-plugin/`)
 
-| 패키지 | 버전 | 용도 |
-|--------|------|------|
-| tsx | ^4.19.2 | TypeScript 직접 실행 |
+**Testing:**
+- None detected (Manual verification / Demo scripts only)
 
-## Node.js Built-in 모듈
+## Key Dependencies
 
-- `node:child_process` - CLI 프로세스 실행 (spawnSync)
-- `node:fs` - 파일 시스템 작업
-- `node:path` - 경로 처리
+**Critical:**
+- Python Standard Library - `subprocess`, `json`, `sys`, `os`, `time` (No external Python dependencies)
 
-## 빌드 도구
+**Infrastructure:**
+- AI CLIs - `claude`, `codex`, `gemini`, `qwen` (External executables required on host)
 
-- **tsx**: TypeScript를 별도 컴파일 없이 직접 실행
-- **tsconfig.json**: 없음 (tsx 기본 설정 사용)
+## Configuration
 
-## 실행 방법
+**Environment:**
+- Environment variables - `ORIGINAL_CWD` passed to script
+- CLI arguments - Controlled via `agent.py` arguments dictionary
 
-```bash
-# 메인 에이전트 실행
-node --import tsx agent.ts "<prompt>"
+**Build:**
+- None (Interpreted execution)
 
-# CLI 러너 실행
-node --import tsx .claude/skills/outsourcing/multi-cli-runner.ts --cli claude --prompt "hello"
+## Platform Requirements
 
-# 데모 실행
-npm run demo:success
-npm run demo:failure
-```
+**Development:**
+- macOS/Linux/Windows (Any platform with Python 3 and Node.js)
+- External CLIs installed and authenticated on PATH
 
-## 외부 CLI 의존성
+**Production:**
+- Claude Code environment with Python 3 available
 
-| CLI | 용도 | 필수 여부 |
-|-----|------|----------|
-| claude | Claude Code CLI | 선택적 |
-| codex | OpenAI Codex CLI | 선택적 |
+---
 
-## 프로젝트 메타정보
-
-```json
-{
-  "name": "claude-subagent-headless-example",
-  "version": "1.0.0",
-  "type": "module"
-}
-```
+*Stack analysis: 2026-01-14*
+*Update after major dependency changes*
