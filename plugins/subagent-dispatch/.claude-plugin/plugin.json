@@ -1,0 +1,9 @@
+{
+  "name": "subagent-dispatch",
+  "version": "0.0.1",
+  "description": "여러 AI CLI(Codex, Claude, Gemini, Qwen)에게 작업을 위임하는 멀티 에이전트 오케스트레이션 플러그인",
+  "author": {
+    "name": "inchan",
+    "email": "inchan@augmentedwe.com"
+  }
+}

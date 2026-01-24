@@ -1,62 +1,30 @@
-# Claude Code Subagent → node agent.ts → claude -p --output-format json (Example)
+# capzang-plugins
 
-이 예제 레포는 아래 흐름을 **작동 가능한 형태**로 최소 구현합니다.
+**Claude Code를 위한 멀티 에이전트 오케스트레이션 플러그인**
 
-1) (메인) Claude Code 실행
-2) 서브에이전트(`claude-cli-runner`)가 Bash로 `node agent.ts` 실행
-3) `agent.ts`가 `claude -p "<prompt>" --output-format json`를 비대화형으로 실행하고 JSON을 파싱
-4) `agent.ts`가 **결정론 체크(파일 존재/정규식 매칭)** 로 성공/실패를 판정하고 JSON 리포트를 출력
-5) 서브에이전트가 그 결과를 메인에게 보고
+이 플러그인은 Claude Code 환경에서 다른 AI CLI(Codex, Gemini, Qwen 등)에게 작업을 위임하고 결과를 통합하는 기능을 제공합니다.
 
-## 요구사항
-- Claude Code CLI 설치 및 로그인 (`claude` 커맨드가 PATH에 있어야 함)
-- Node.js 18+ (이 예제는 TS 실행을 위해 `tsx`를 사용합니다)
+## 주요 기능
 
-## 설치
-```bash
-npm install
-```
+- **작업 위임**: `/delegate` 명령어로 특정 AI에게 작업 요청
+- **자동 라우팅**: "codex", "gemini" 등 키워드 감지 시 자동 위임
+- **결과 통합**: 다양한 CLI의 출력을 통일된 JSON 형식으로 변환
 
-## 터미널에서 바로 데모 실행
-성공 데모:
-```bash
-npm run demo:success
-```
+## 포함된 플러그인
 
-실패 데모:
-```bash
-npm run demo:failure
-```
+### subagent-dispatch
 
-## Claude Code에서 사용하기
-1) 이 레포에서 Claude Code를 실행:
-```bash
-claude
-```
+핵심 위임 기능을 담당하는 플러그인입니다.
 
-2) `/agents`에서 `claude-cli-runner`가 보이는지 확인(프로젝트 레벨 `.claude/agents/`에 있음)
+- **명령어**: `/delegate`
+- **스킬**: `delegation` (자동 트리거)
+- **에이전트**: `delegate-runner`
+- **실행기**: `agent.py` (Python 기반)
 
-3) 커스텀 명령 실행:
-```text
-/delegate Create out/hello.txt containing the word hello --expect-file out/hello.txt --expect-regex out/hello.txt:hello
-```
+## 시작하기
 
-Claude는 `claude-cli-runner` 서브에이전트를 사용해 `npm run agent ...`를 실행하고,
-`agent.ts`가 출력한 JSON 리포트(성공/실패, 체크 결과, session_id 등)를 되돌려줄 겁니다.
+1. 이 저장소를 클론하거나 플러그인으로 설치합니다.
+2. 필요한 AI CLI 도구들을 설치하고 인증합니다 (`claude`, `codex`, `gemini`, `qwen`).
+3. Claude Code에서 `/delegate` 명령을 사용해 보세요.
 
-## agent.ts 사용법
-```bash
-node --import tsx agent.ts "<prompt>" \
-  --expect-file out/hello.txt \
-  --expect-regex out/hello.txt:hello
-```
-
-### 성공/실패 판정 규칙
-- `claude` 실행이 실패(프로세스 에러/exit code != 0)하면 실패
-- `--expect-file`, `--expect-regex` 체크 중 하나라도 실패하면 실패
-- 그 외는 성공
-
-## 참고
-- `claude -p`와 `--output-format json`은 Claude Code의 비대화형 실행 및 JSON 출력 옵션입니다.
-- 자동화에서 도구 승인을 줄이려면 `--allowedTools`를 활용합니다.
-
+자세한 내용은 [subagent-dispatch/README.md](subagent-dispatch/README.md)를 참조하세요.
