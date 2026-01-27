@@ -1,0 +1,9 @@
+{
+  "name": "prompt-enchant",
+  "version": "0.0.1",
+  "description": "프롬프트 명확화 플러그인",
+  "author": {
+    "name": "inchan",
+    "email": "inchan@augmentedwe.com"
+  }
+}

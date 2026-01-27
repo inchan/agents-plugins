@@ -12,7 +12,7 @@
 
 ## 포함된 플러그인
 
-### subagent-dispatch
+### agent-delegation
 
 핵심 위임 기능을 담당하는 플러그인입니다.
 
@@ -27,4 +27,4 @@
 2. 필요한 AI CLI 도구들을 설치하고 인증합니다 (`claude`, `codex`, `gemini`, `qwen`).
 3. Claude Code에서 `/delegate` 명령을 사용해 보세요.
 
-자세한 내용은 [subagent-dispatch/README.md](subagent-dispatch/README.md)를 참조하세요.
+자세한 내용은 [agent-delegation/README.md](agent-delegation/README.md)를 참조하세요.

@@ -1,4 +1,4 @@
-# subagent-dispatch
+# agent-delegation
 
 AI CLI(Codex, Claude, Gemini, Qwen)에게 작업을 위임하는 플러그인
 
@@ -45,7 +45,7 @@ AI CLI(Codex, Claude, Gemini, Qwen)에게 작업을 위임하는 플러그인
 ## 구조
 
 ```
-subagent-dispatch/
+agent-delegation/
 ├── .claude-plugin/plugin.json
 ├── commands/delegate.md
 ├── agents/delegator.md
