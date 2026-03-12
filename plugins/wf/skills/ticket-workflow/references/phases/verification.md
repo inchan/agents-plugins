@@ -97,30 +97,92 @@ Execute all relevant tests in order:
 
 ### Step 2: Type-Specific Verification
 
-#### For UI Tickets — Browser Automation
+#### For UI Tickets — Before/After Visual Comparison
 
-Use available browser tools in priority order:
+UI 티켓은 수정 전후의 시각적 상태를 비교하여 검증한다. browser-reproducer 에이전트의 도구 감지 결과를 재사용한다.
 
-1. **Playwright MCP** (preferred)
-   - Navigate to the affected page
-   - Capture "after" screenshot
-   - Compare with "before" screenshot from evidence phase
-   - Validate DOM structure matches expectations
+##### After 스크린샷 캡처 절차
 
-2. **Chrome DevTools** (alternative)
-   - Open the affected page
-   - Inspect computed styles
-   - Verify layout metrics
+1. **Before 경로 확인:** `phase_outputs["EVIDENCE"].screenshot_references`에서 Before 스크린샷 경로를 읽는다
+   - `before_full`: `/tmp/wf_{ticket_id}/before_full.png`
+   - `before_element`: `/tmp/wf_{ticket_id}/before_element.png`
 
-3. **agent-browser skill** (fallback)
-   - Navigate and capture visual state
-   - Verify visual correctness
+2. **동일 도구 선택:** EVIDENCE 단계에서 캐싱된 `primary_tool` (browser-reproducer의 도구 감지 결과)을 재사용한다. 동일한 브라우저 도구로 일관된 비교를 보장한다.
+
+3. **동일 URL 네비게이션:** EVIDENCE 단계와 동일한 URL로 navigate한다.
+
+4. **동일 reproduction steps 재실행:** EVIDENCE 단계와 동일한 viewport, 동일한 steps를 순서대로 실행한다.
+
+5. **After 스크린샷 캡처:** `wait_for_load_state("networkidle")` 후 캡처한다:
+   - 전체 페이지: `/tmp/wf_{ticket_id}/after_full.png`
+   - 영향받는 요소: `/tmp/wf_{ticket_id}/after_element.png`
+
+6. **도구 실패 시 폴백:** browser-reproducer의 폴백 체인을 동일하게 적용한다:
+   ```
+   Playwright MCP → Chrome DevTools → Agent Browser → Code Analysis
+   ```
+
+##### Before/After 비교 로직
+
+세 가지 비교 방법을 순차 실행하여 시각적 변화를 정량적으로 판정한다:
+
+**1. maxDiffPixels 비교 (스크린샷 픽셀 비교)**
+
+| 비교 대상 | maxDiffPixels 임계값 | 판정 |
+|-----------|---------------------|------|
+| element 스크린샷 (`before_element` vs `after_element`) | 100px | diff_pixels <= 100 → match |
+| full page 스크린샷 (`before_full` vs `after_full`) | 500px | diff_pixels <= 500 → match |
+
+**2. DOM 구조 비교**
+```
+evaluate로 관련 요소의 outerHTML을 직렬화하여 Before/After 비교
+변화 유무: 구조적 변경(태그, 속성, 클래스) 감지
+```
+
+**3. 계산된 스타일 비교**
+```
+getComputedStyle 결과를 JSON으로 직렬화하여 Before/After 비교
+변경된 CSS 속성 목록 출력
+```
+
+**판정 기준:** 세 가지 비교 중 하나라도 **개선(의도된 변화)**이 확인되면 `visual_comparison.status = "match"`로 판정한다.
+
+##### 비교 결과 출력
+
+browser-automation.md의 "Into Verification Report" JSON 구조를 그대로 사용한다:
+
+```json
+{
+  "visual_comparison": {
+    "status": "match | mismatch",
+    "before_screenshot": "/tmp/wf_{ticket_id}/before_full.png",
+    "after_screenshot": "/tmp/wf_{ticket_id}/after_full.png",
+    "differences": ["DOM: class 'error' removed", "Style: margin-left changed 16px → 8px"],
+    "diff_pixels": 42,
+    "max_diff_pixels": 200,
+    "assertions_passed": 3,
+    "assertions_failed": 0
+  }
+}
+```
+
+##### 실패 처리
+
+| 상황 | 처리 |
+|------|------|
+| `visual_comparison.status == "mismatch"` | `E_VERIFY` → 재시도 트리거 (즉각 FAILED가 아님) |
+| 스크린샷 캡처 자체 실패 | DOM/스타일 기반 비교로 폴백, `[WARN ] [VERIFY] — Screenshot capture failed, falling back to DOM/style comparison` |
+| Before 스크린샷이 없음 | DOM/스타일 비교만 수행, `[WARN ] [VERIFY] — No before screenshot found, using DOM/style only` |
+| 모든 비교 방법 실패 | `E_VERIFY` → 코드 수준 분석으로 최종 폴백 |
 
 ```
 UI Verification Checklist:
+  □ After 스크린샷이 동일 URL/동일 steps로 캡처됨
+  □ Before/After 픽셀 비교 완료 (maxDiffPixels 이내)
+  □ DOM 구조 비교 완료
+  □ 계산된 스타일 비교 완료
+  □ visual_comparison JSON이 verification_report에 포함됨
   □ Page loads without errors
-  □ Affected element renders correctly
-  □ Layout matches expected behavior
   □ No visual regressions in surrounding elements
   □ Responsive behavior correct (if applicable)
 ```
@@ -156,8 +218,7 @@ Non-UI Verification Checklist:
   □ No performance regression
 ```
 
-**For UI tickets** — Browser automation is integrated in Phase 2 (browser-reproducer). See `../browser-automation.md`.
-<!-- Phase 2 UI: browser-reproducer 통합 예정 — Playwright MCP 통합 전까지 코드 수준 폴백 사용 -->
+**For UI tickets** — Browser automation은 browser-reproducer 에이전트를 통해 통합됨. 상세 도구 정의는 `../browser-automation.md` 참조.
 
 ### Step 3: Verification Report
 
