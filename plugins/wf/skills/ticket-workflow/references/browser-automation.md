@@ -2,8 +2,6 @@
 
 > Reference document for UI issue reproduction and verification via browser automation tools.
 
-> **Phase 2 Note**: Full browser automation integration (Playwright MCP, Chrome DevTools) is planned for Phase 2.
-> Currently, browser-based reproduction falls back to code-level analysis.
 
 ## Overview
 
@@ -23,14 +21,12 @@ Playwright MCP   ──▶  Chrome DevTools  ──▶  Agent Browser  ──▶
 - Full browser control via MCP tool calls
 - Supports navigation, interaction, screenshots, DOM inspection
 - Requires: `playwright` npm package or Playwright MCP server configured
-- **Phase 2에서 구현 예정**
 
 ### 2. Chrome DevTools Protocol (alternative)
 
 - Direct Chrome/Chromium control via CDP
 - Supports page navigation, JS evaluation, screenshots
 - Requires: Chrome/Chromium binary or puppeteer
-- **Phase 2에서 구현 예정**
 
 ### 3. Agent Browser Skill (fallback)
 

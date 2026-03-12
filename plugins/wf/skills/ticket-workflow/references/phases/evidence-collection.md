@@ -44,6 +44,14 @@ Agent prompts:
 - Dispatch a `browser-reproducer` agent to drive the browser session (see `agents/browser-reproducer.md`)
 - Use available browser tools (Playwright MCP preferred) to detect tools and build a reproduction plan
 - See [browser-automation.md](../browser-automation.md) for full integration reference
+
+```
+Agent (browser-reproducer):
+  Task: "Reproduce UI bug: <reproduction_steps>. URL: <url>. Viewport: <viewport>"
+  Tools: Bash, Read, Glob, Grep, WebFetch + available MCP tools
+  Timeout: 19 minutes 59 seconds
+```
+
 - Capture screenshots at key reproduction steps:
   1. **INITIAL_STATE** — Page loaded before interaction
   2. **PRE_ACTION** — State right before triggering the bug
@@ -52,9 +60,6 @@ Agent prompts:
 - Screenshots are saved to `{output_dir}/{ticket_id}/screenshots/` with structured filenames
 - Supports multiple viewports (desktop and mobile) for responsive UI bugs
 - Record DOM state and computed styles if relevant
-
-> **Phase 2 Note**: Full browser automation (Playwright MCP screenshot capture) is implemented in Phase 2.
-> Currently falls back to code-level analysis when browser tools are unavailable.
 
 **For non-UI tickets:**
 - Run relevant test suite to confirm failure
