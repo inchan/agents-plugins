@@ -73,6 +73,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 플러그인 구조 통합 + Non-UI 핵심 워크플로우 | 1/4 | In Progress|  |
+| 1. 플러그인 구조 통합 + Non-UI 핵심 워크플로우 | 2/4 | In Progress|  |
 | 2. UI 브라우저 자동화 | 0/3 | Not started | - |
 | 3. 점수 시스템 + 리포트 완성 | 0/2 | Not started | - |
