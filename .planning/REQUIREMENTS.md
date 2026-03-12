@@ -40,9 +40,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### 플러그인 구조 (PLUG)
 
-- [ ] **PLUG-01**: plugins/wf/ 디렉토리에 표준 플러그인 구조로 배치한다 (.claude-plugin/plugin.json + skills/ + agents/)
-- [ ] **PLUG-02**: SKILL.md는 500줄 이하로 유지하고 상세 로직은 references/로 위임한다
-- [ ] **PLUG-03**: 기존 v0.2/v0.3 구현을 통합하여 단일 버전으로 정리한다
+- [x] **PLUG-01**: plugins/wf/ 디렉토리에 표준 플러그인 구조로 배치한다 (.claude-plugin/plugin.json + skills/ + agents/)
+- [x] **PLUG-02**: SKILL.md는 500줄 이하로 유지하고 상세 로직은 references/로 위임한다
+- [x] **PLUG-03**: 기존 v0.2/v0.3 구현을 통합하여 단일 버전으로 정리한다
 
 ## v2 Requirements
 
@@ -76,9 +76,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLUG-01 | Phase 1 | Pending |
-| PLUG-02 | Phase 1 | Pending |
-| PLUG-03 | Phase 1 | Pending |
+| PLUG-01 | Phase 1 | Complete |
+| PLUG-02 | Phase 1 | Complete |
+| PLUG-03 | Phase 1 | Complete |
 | CORE-01 | Phase 1 | Pending |
 | CORE-02 | Phase 1 | Pending |
 | CORE-03 | Phase 1 | Pending |
