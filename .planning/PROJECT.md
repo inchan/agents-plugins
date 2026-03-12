@@ -12,18 +12,16 @@ Claude Code 플러그인용 자동화된 티켓 워크플로우 스킬(SKILL.md)
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ 티켓 내용을 분석하여 UI/로직/기능/리팩토링/성능으로 자동 분류 — Phase 1
+- ✓ 모든 티켓 유형에 대해 코드베이스에서 증거 수집 — Phase 1
+- ✓ 탐색 → 계획 → 구현 단계 순차 실행 (완전 자동) — Phase 1
+- ✓ 테스트 및 통합 테스트로 검증 — Phase 1
+- ✓ 검증 실패 시 최대 3회 재시도 (매회 원인 분석 후 전략 수정) — Phase 1
 
 ### Active
-
-- [ ] 티켓 내용을 분석하여 UI/로직/기능/리팩토링/성능으로 자동 분류
-- [ ] 모든 티켓 유형에 대해 코드베이스에서 증거 수집
 - [ ] UI 이슈는 브라우저 자동화 도구로 재현 및 스크린샷 캡처
 - [ ] 브라우저 도구 병렬 크로스체크 (playwright, chrome devtools, agent-browser)
-- [ ] 탐색 → 계획 → 구현 단계 순차 실행 (완전 자동)
-- [ ] 테스트 및 통합 테스트로 검증
 - [ ] UI 이슈는 before/after 스크린샷 비교로 시각적 검증
-- [ ] 검증 실패 시 최대 3회 재시도 (매회 원인 분석 후 전략 수정)
 - [ ] 단계별 + 종합 점수를 프로그레스 바로 시각적 출력
 - [ ] 결과를 콘솔 출력 + 마크다운 파일로 저장
 
@@ -59,6 +57,10 @@ Claude Code 플러그인용 자동화된 티켓 워크플로우 스킬(SKILL.md)
 | 완전 자동 실행 | 사용자 개입 최소화가 목표 | — Pending |
 | 브라우저 도구 병렬 크로스체크 | 단일 도구 의존 리스크 감소 | — Pending |
 | 프로그레스 바 시각화 | 직관적 결과 파악 | — Pending |
+| Python lib 제거 | 순수 마크다운 명세 — Claude Code 플러그인은 SKILL.md 기반 실행 | Phase 1 완료 |
+| v0.2/v0.3 통합 | plugins/wf/ 단일 경로로 single source of truth | Phase 1 완료 |
+| sub_type 분류 도입 | Non-UI 하위 유형(logic/feature/refactoring/performance) | Phase 1 완료 |
+| 3단계 재시도 전략 | full → targeted → relaxed 점진적 접근 | Phase 1 완료 |
 
 ---
-*Last updated: 2026-03-12 after initialization*
+*Last updated: 2026-03-12 after Phase 1*
