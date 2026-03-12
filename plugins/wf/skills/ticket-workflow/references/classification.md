@@ -10,7 +10,18 @@ The classifier uses a multi-dimensional signal analysis approach across 7 signal
 
 ### Signal Dimension 1: Explicit Override
 
-If user provides `--type ui` or `--type non-ui`, use that classification directly with confidence 1.0.
+Supported `--type` values:
+
+| Flag | ticket_type | sub_type | confidence |
+|------|-------------|----------|------------|
+| `--type ui` | `ui` | `null` | 1.0 |
+| `--type non-ui` | `non-ui` | auto-classified | 1.0 (ticket_type only) |
+| `--type logic` | `non-ui` | `logic` | 1.0 |
+| `--type feature` | `non-ui` | `feature` | 1.0 |
+| `--type refactoring` | `non-ui` | `refactoring` | 1.0 |
+| `--type performance` | `non-ui` | `performance` | 1.0 |
+
+If user provides any of the above flags, use that classification directly with confidence 1.0.
 
 ### Signal Dimension 2: Weighted Keyword Category Matching
 
@@ -118,6 +129,7 @@ else:  # ambiguous (0.35 < ui_ratio < 0.65)
 ```json
 {
   "ticket_type": "ui" | "non-ui",
+  "sub_type": null | "logic" | "feature" | "refactoring" | "performance",
   "confidence": 0.92,
   "ui_score": 5.6,
   "non_ui_score": 0.7,
@@ -136,14 +148,100 @@ else:  # ambiguous (0.35 < ui_ratio < 0.65)
 }
 ```
 
+**Field rules:**
+- `ticket_type="ui"` → `sub_type` is always `null` (Phase 2에서 확장 가능)
+- `ticket_type="non-ui"` → `sub_type`는 `logic | feature | refactoring | performance` 중 하나
+
+---
+
+## Non-UI Sub-Type Classification
+
+### Overview
+
+Non-UI 티켓으로 분류된 후 2차 분류로 `sub_type`을 결정한다. `sub_type` confidence는 `ticket_type` confidence와 독립적으로 산출된다.
+
+### Sub-Type Rules
+
+**1. `refactoring` (최우선 체크)**
+
+다음 키워드가 존재하면 `sub_type="refactoring"`:
+
+| Keywords |
+|----------|
+| refactor, cleanup, tech debt, code smell, rename, extract, simplify, reorganize, restructure, dead code, unused, decouple, modularize |
+
+> 리팩토링은 기능 변경 없이 구조 개선이므로 최우선 판별.
+
+**2. `performance` (2순위)**
+
+다음 키워드가 존재하면 `sub_type="performance"`:
+
+| Keywords |
+|----------|
+| performance, slow, latency, memory leak, cache, optimize, bottleneck, profiling, throughput, benchmark, timeout, OOM, out of memory |
+
+**3. `logic` (3순위 — backend + data_logic 신호 우세)**
+
+Non-UI 키워드 중 `backend` 또는 `data_logic` 카테고리 가중치 합계가 `infrastructure + cli_system` 합계보다 클 때:
+
+| Primary signals |
+|-----------------|
+| backend(api, endpoint, database, query, migration, authentication, token) |
+| data_logic(calculation, algorithm, race condition, memory leak, exception, timeout) |
+
+→ `sub_type="logic"`
+
+**4. `feature` (4순위 — infrastructure + cli_system 신호 우세 또는 기본값)**
+
+`infrastructure` 또는 `cli_system` 카테고리 가중치 합계가 우세하거나, 위 3가지에 해당하지 않을 때:
+
+| Primary signals |
+|-----------------|
+| infrastructure(deploy, docker, kubernetes, aws, terraform, monitoring, logging) |
+| cli_system(cli, terminal, cron, daemon, queue, kafka, redis, cache) |
+
+→ `sub_type="feature"`
+
+### Sub-Type Priority Order
+
+```
+refactoring > performance > logic > feature
+```
+
+위 순서로 체크하여 첫 번째 매칭 sub_type을 사용한다.
+
+---
+
+## Display Type Mapping
+
+분류 결과를 사용자에게 표시할 때 사용하는 매핑 테이블:
+
+| ticket_type | sub_type | Display Label (한글) | Display Label (영문) |
+|-------------|----------|---------------------|---------------------|
+| `ui` | `null` | UI | UI |
+| `non-ui` | `logic` | 로직 | Logic |
+| `non-ui` | `feature` | 기능 | Feature |
+| `non-ui` | `refactoring` | 리팩토링 | Refactoring |
+| `non-ui` | `performance` | 성능 | Performance |
+
+**사용 예시:**
+
+```
+[INFO ] [CLASSIFY] +0:12 — 분류 완료: 로직 (신뢰도: 0.88)
+[INFO ] [CLASSIFY] +0:05 — 분류 완료: UI (신뢰도: 1.00) [--type override]
+```
+
 ## Classification Impact on Subsequent Phases
 
-| Aspect | UI Ticket | Non-UI Ticket |
-|--------|-----------|---------------|
-| **Phase 3 (Explore)** | Component tree + CSS cascade analysis agent | Standard code tracing agents |
-| **Phase 5 (Implement)** | Visual, responsive, accessibility focus | Logic, data, API correctness focus |
-| **Phase 6 (Verify)** | Tests + browser automation (Playwright MCP / Chrome DevTools / agent-browser) | Tests only |
-| **Phase 6 fallback** | DOM analysis if browser tools unavailable | N/A |
+| ticket_type | sub_type | Phase 3 (Explore) | Phase 5 (Implement) | Phase 6 (Verify) |
+|-------------|----------|-------------------|---------------------|------------------|
+| `ui` | `null` | 컴포넌트 트리 + CSS cascade 분석 에이전트 | 시각적/반응형/접근성 중심 | 테스트 + 브라우저 자동화 (Playwright MCP / Chrome DevTools) |
+| `non-ui` | `logic` | 실행 경로 추적 + 데이터 플로우 분석 | 로직/알고리즘 수정, API 정합성 | 기능 테스트, 단위 테스트, assertion 검증 |
+| `non-ui` | `feature` | 기능 흐름 분석 + 인프라/CLI 구조 탐색 | 기능 구현/수정, 인프라 변경 | 통합 테스트, E2E 흐름 검증 |
+| `non-ui` | `refactoring` | 코드 구조 분석 + 의존성 그래프 탐색 | 리팩토링 적용 (동작 변경 없음) | 회귀 테스트, 동작 동등성 검증 |
+| `non-ui` | `performance` | 프로파일링 포인트 식별 + 병목 추적 | 최적화 적용 (캐시/알고리즘/쿼리) | 벤치마크 검증, 성능 기준값 비교 |
+
+**Phase 6 fallback (UI only):** 브라우저 도구 미사용 시 DOM 분석 / 코드 레벨 폴백
 
 ---
 
