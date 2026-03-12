@@ -1,0 +1,9 @@
+{
+  "name": "wf",
+  "version": "1.0.0",
+  "description": "Automated bug ticket workflow: evidence collection, classification, exploration, planning, implementation, and verification with UI/non-UI classification",
+  "author": {
+    "name": "inchan",
+    "email": "inchan@augmentedwe.com"
+  }
+}
