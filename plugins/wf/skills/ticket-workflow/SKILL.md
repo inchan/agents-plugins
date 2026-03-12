@@ -53,13 +53,15 @@ See [Evidence Collection](references/phases/evidence-collection.md) for detailed
 
 7차원 신호 분석으로 티켓을 UI vs Non-UI로 분류하고 신뢰도 점수(0.0~1.0)를 산출한다.
 
-- `--type` 오버라이드: 직접 지정 시 confidence 1.0
+- `--type` 오버라이드: `ui | non-ui | logic | feature | refactoring | performance` 직접 지정 시 confidence 1.0
 - 7가지 신호: 키워드, 파일 경로, 에러 유형, 스택트레이스, 재현 단계, 첨부파일, 컴포넌트 언급
 - 신뢰도 >= 0.8: 자동 진행 / 0.6~0.8: 불확실성 로그 / < 0.5: non-UI 기본값
+- Non-UI 티켓은 추가로 `logic | feature | refactoring | performance` 하위 유형으로 분류된다
+- 분류 결과: UI / 로직 / 기능 / 리팩토링 / 성능 중 하나 + 신뢰도 점수(0.0~1.0)
 
-**Produces**: `ticket_type`, `confidence`, `classification_signals`, `ui_details`
+**Produces**: `ticket_type`, `sub_type`, `confidence`, `classification_signals`, `ui_details`
 
-See [Classification Rules](references/classification.md) for full 7-dimension algorithm.
+See [Classification Rules](references/classification.md) for full 7-dimension algorithm and sub_type rules.
 
 ---
 
@@ -143,7 +145,7 @@ INIT → EVIDENCE → CLASSIFY → EXPLORE → PLAN → IMPLEMENT → VERIFY →
 1. **Strict order**: No phase skipping. Each phase requires the previous output.
 2. **Immutable history**: Phases 1-4 outputs persist through retries.
 3. **Retry scope**: Only Phases 5→6 loop on verification failure.
-4. **Type branching**: After Phase 2, ticket type influences Phases 3, 5, and 6.
+4. **Type branching**: After Phase 2, `ticket_type` + `sub_type` both influence Phases 3, 5, and 6.
 5. **Progress reporting**: Scorecard renders at every phase boundary.
 6. **Graceful degradation**: Non-critical failures degrade rather than abort.
 
@@ -215,6 +217,10 @@ See [Workflow Logger](references/workflow-logger.md) for full error handling pro
 /ticket-workflow <ticket description or URL>
 /ticket-workflow --type ui "Button alignment broken on mobile viewport"
 /ticket-workflow --type non-ui "API returns 500 on empty payload"
+/ticket-workflow --type logic "Race condition in payment processing"
+/ticket-workflow --type feature "Add Kafka consumer for order events"
+/ticket-workflow --type refactoring "Extract auth logic into service layer"
+/ticket-workflow --type performance "Optimize slow database queries"
 ```
 
 ## Output

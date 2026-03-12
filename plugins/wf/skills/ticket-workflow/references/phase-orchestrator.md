@@ -113,6 +113,8 @@ Output: {
 ```
 Output: {
   ticket_type: "ui" | "non-ui"
+  sub_type: null | "logic" | "feature" | "refactoring" | "performance"
+  // sub_type is null for UI tickets; always set for non-UI tickets
   confidence: float  // 0.0 - 1.0
   classification_signals: Signal[]
   ui_details: UIDetails | null  // only for UI tickets
@@ -246,14 +248,31 @@ Standard error codes: `E_TOOL`, `E_NOTFOUND`, `E_TIMEOUT`, `E_PARSE`, `E_VERIFY`
 
 ### Rule 6: Type-Dependent Branching
 
-After classification (Phase 2), the ticket type influences:
+After classification (Phase 2), both `ticket_type` and `sub_type` are propagated to all subsequent phases. The combination determines phase behavior:
 
-| Aspect | UI | Non-UI |
-|--------|-----|--------|
-| Phase 3 agents | Include component tree + CSS analysis | Standard code tracing |
-| Phase 5 focus | Visual, responsive, accessibility | Logic, data, API correctness |
-| Phase 6 method | Tests + browser automation | Tests only |
-| Phase 6 fallback | DOM analysis if browser unavailable | - |
+| ticket_type | sub_type | Phase 3 Agents | Phase 5 Focus | Phase 6 Method |
+|-------------|----------|----------------|----------------|----------------|
+| `ui` | `null` | bug-tracer x2 + CSS/component Agent C | 시각적/반응형/접근성 수정 | 테스트 + 브라우저 자동화 (Playwright MCP / Chrome DevTools) |
+| `non-ui` | `logic` | bug-tracer x2 (실행 경로 + 데이터 플로우) | 로직/알고리즘 수정, API 정합성 | 기능 테스트, 단위 테스트, assertion 검증 |
+| `non-ui` | `feature` | bug-tracer x2 (기능 흐름 + 인프라 구조) | 기능 구현/수정, 인프라 변경 | 통합 테스트, E2E 흐름 검증 |
+| `non-ui` | `refactoring` | bug-tracer x2 (코드 구조 + 의존성 그래프) | 리팩토링 적용 (동작 변경 없음) | 회귀 테스트, 동작 동등성 검증 |
+| `non-ui` | `performance` | bug-tracer x2 (프로파일링 포인트 + 병목 추적) | 최적화 적용 (캐시/알고리즘/쿼리) | 벤치마크 검증, 성능 기준값 비교 |
+
+**Phase 6 fallback (UI only):** 브라우저 도구 미사용 시 DOM 분석 / 코드 레벨 폴백
+
+**Passing sub_type forward:** Phase 2 output의 `sub_type` 값은 phases 3, 5, 6에 전달되어 에이전트 지시에 사용된다:
+
+```
+# Phase 3 agent dispatch with sub_type
+if ticket_type == "non-ui":
+    sub_type_instruction = {
+      "logic":       "Trace execution path and data flow for logic errors",
+      "feature":     "Analyze feature flow, infrastructure, and CLI structure",
+      "refactoring": "Map code structure, dependencies, and coupling points",
+      "performance": "Identify profiling points, bottlenecks, and hot paths"
+    }[sub_type]
+    Agent A: "Trace the execution path for '<bug scenario>' from entry to failure. " + sub_type_instruction
+```
 
 ---
 
@@ -275,6 +294,7 @@ When the `/ticket` command is invoked:
    workflow_state = {
      phase: "INIT",
      ticket_type: null,
+     sub_type: null,  // set after Phase 2; null for UI, one of logic/feature/refactoring/performance for non-UI
      retry_count: 0,
      max_retries: 3,
      phase_outputs: {},
@@ -306,6 +326,7 @@ for phase in [EVIDENCE, CLASSIFY, EXPLORE, PLAN, IMPLEMENT, VERIFY]:
     # Phase-specific post-processing
     if phase == CLASSIFY:
         workflow_state.ticket_type = output.ticket_type
+        workflow_state.sub_type = output.sub_type  # null for UI; logic/feature/refactoring/performance for non-UI
     if phase == VERIFY:
         handle_verification_result(output, workflow_state)
 ```
@@ -403,7 +424,7 @@ These conditions must hold throughout the workflow:
 
 1. **Phase outputs are immutable** — Once produced, a phase's output is never modified (retries produce new IMPLEMENT/VERIFY outputs, but phases 1-4 outputs persist)
 2. **Retry count never exceeds 3** — `0 <= retry_count <= max_retries`
-3. **Type is set after Phase 2** — `ticket_type` is null before Phase 2 and always non-null after
+3. **Type is set after Phase 2** — `ticket_type` is null before Phase 2 and always non-null after. `sub_type` is null for UI tickets and always set for non-UI tickets after Phase 2.
 4. **Progress is monotonic** — Overall progress percentage never decreases (retries don't reduce it)
 5. **Every phase produces a quality score** — No phase completes without a 0.0-1.0 quality score
 6. **Scorecard renders at every boundary** — The progress visualization appears between every phase
