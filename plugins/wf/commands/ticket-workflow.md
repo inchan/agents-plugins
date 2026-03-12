@@ -60,8 +60,8 @@ All phase behavior is defined in the following reference documents:
 | Browser Automation | `skills/ticket-workflow/references/browser-automation.md` | UI verification tools |
 | Scoring | `skills/ticket-workflow/references/scoring.md` | Progress scorecard rendering |
 | Workflow Logger | `skills/ticket-workflow/references/workflow-logger.md` | Log format standards |
-| Phase: Evidence | `skills/ticket-workflow/references/phases/evidence.md` | Phase 1 procedure |
-| Phase: Classification | `skills/ticket-workflow/references/phases/classification.md` | Phase 2 procedure |
+| Phase: Evidence | `skills/ticket-workflow/references/phases/evidence-collection.md` | Phase 1 procedure |
+| Phase: Classification | `skills/ticket-workflow/references/classification.md` | Phase 2 classification rules |
 | Phase: Exploration | `skills/ticket-workflow/references/phases/exploration.md` | Phase 3 procedure |
 | Phase: Planning | `skills/ticket-workflow/references/phases/planning.md` | Phase 4 procedure |
 | Phase: Implementation | `skills/ticket-workflow/references/phases/implementation.md` | Phase 5 procedure |
@@ -100,7 +100,7 @@ After agents return: synthesize findings into `evidence_report`.
 [INFO ] [EVIDENCE  ] +<time> -- Phase completed: Evidence Collection (score: <N>%)
 ```
 
-See full procedure: `skills/ticket-workflow/references/phases/evidence.md`
+See full procedure: `skills/ticket-workflow/references/phases/evidence-collection.md`
 
 ---
 
@@ -117,7 +117,7 @@ Classify the ticket as `ui` or `non-ui` using the classification rules.
 [INFO ] [CLASSIFY  ] +<time> -- Phase completed: Classification (score: <N>%)
 ```
 
-See full procedure: `skills/ticket-workflow/references/phases/classification.md`
+See full procedure: `skills/ticket-workflow/references/classification.md`
 
 ---
 
