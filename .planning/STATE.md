@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-non-ui-03-PLAN.md
-last_updated: "2026-03-12T05:53:43Z"
+stopped_at: Completed 01-non-ui-04-PLAN.md
+last_updated: "2026-03-12T05:58:31.944Z"
 last_activity: 2026-03-12 — ROADMAP.md 생성 완료
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-non-ui P01 | 219s | 2 tasks | 19 files |
 | Phase 01-non-ui P02 | 2m | 1 tasks | 2 files |
 | Phase 01-non-ui P03 | 3m | 2 tasks | 3 files |
+| Phase 01-non-ui P04 | 131s | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,9 @@ Recent decisions affecting current work:
 - [Phase 01-non-ui]: SKILL.md 500줄 이하 유지 원칙 확립 — 상세 내용은 references/로 분리
 - [Phase 01-non-ui P03]: 커맨드-오케스트레이터 분리 — 커맨드는 진입점, 로직은 phase-orchestrator.md에 위임
 - [Phase 01-non-ui P03]: full→targeted→relaxed 3단계 재시도 전략 확정 — 점진적 범위 확대로 불필요한 변경 최소화
+- [Phase 01-non-ui]: sub_type 우선순위: refactoring > performance > logic > feature — 리팩토링 최우선으로 의도 명확화
+- [Phase 01-non-ui]: --type 확장: logic/feature/refactoring/performance 직접 지정 지원, confidence 1.0
+- [Phase 01-non-ui]: Display Type Mapping: 분류 결과를 한글/영문 레이블(UI/로직/기능/리팩토링/성능)로 변환
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T05:53:43Z
-Stopped at: Completed 01-non-ui-03-PLAN.md
+Last session: 2026-03-12T05:58:31.941Z
+Stopped at: Completed 01-non-ui-04-PLAN.md
 Resume file: None

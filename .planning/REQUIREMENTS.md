@@ -20,9 +20,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### 분류 (CLSF)
 
-- [ ] **CLSF-01**: 티켓 내용을 분석하여 UI/로직/기능/리팩토링/성능 유형으로 자동 분류한다
-- [ ] **CLSF-02**: 분류 신뢰도 점수를 산출한다 (0.0~1.0)
-- [ ] **CLSF-03**: 분류 결과에 따라 이후 워크플로우 경로가 분기된다 (UI vs Non-UI)
+- [x] **CLSF-01**: 티켓 내용을 분석하여 UI/로직/기능/리팩토링/성능 유형으로 자동 분류한다
+- [x] **CLSF-02**: 분류 신뢰도 점수를 산출한다 (0.0~1.0)
+- [x] **CLSF-03**: 분류 결과에 따라 이후 워크플로우 경로가 분기된다 (UI vs Non-UI)
 
 ### UI 브라우저 자동화 (UIBR)
 
@@ -87,9 +87,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-06 | Phase 1 | Complete |
 | CORE-07 | Phase 1 | Complete |
 | CORE-08 | Phase 1 | Complete |
-| CLSF-01 | Phase 1 | Pending |
-| CLSF-02 | Phase 1 | Pending |
-| CLSF-03 | Phase 1 | Pending |
+| CLSF-01 | Phase 1 | Complete |
+| CLSF-02 | Phase 1 | Complete |
+| CLSF-03 | Phase 1 | Complete |
 | UIBR-01 | Phase 2 | Pending |
 | UIBR-02 | Phase 2 | Pending |
 | UIBR-03 | Phase 2 | Pending |
