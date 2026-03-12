@@ -45,12 +45,12 @@ Plans:
   2. 수정 완료 후 After 스크린샷이 캡처되어 Before와 나란히 비교 결과가 출력된다
   3. Playwright MCP가 없는 환경에서도 Chrome DevTools → agent-browser 순으로 폴백되어 워크플로우가 중단되지 않는다
   4. 브라우저 도구 병렬 크로스체크 결과가 하나의 검증 결론으로 집계된다
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Playwright MCP 통합 — browser-reproducer 에이전트 + Before 스크린샷 캡처
-- [ ] 02-02: After 스크린샷 + Before/After 비교 검증 — UIBR-02
-- [ ] 02-03: 브라우저 병렬 크로스체크 + 폴백 체인 — UIBR-03, UIBR-04
+- [ ] 02-01-PLAN.md — browser-reproducer 에이전트 완전 구현 + evidence-collection UI 활성화 (Wave 1)
+- [ ] 02-02-PLAN.md — After 스크린샷 + Before/After 비교 검증 + verifier UI 통합 (Wave 2)
+- [ ] 02-03-PLAN.md — 병렬 크로스체크 + Agent Registry 등록 + UI 데이터 플로우 (Wave 2)
 
 ### Phase 3: 점수 시스템 + 리포트 완성
 **Goal**: 워크플로우 완료 후 단계별 품질 점수가 프로그레스 바로 시각화되고 결과 리포트가 파일로 저장된다
