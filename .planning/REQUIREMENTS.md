@@ -9,14 +9,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### 워크플로우 코어 (CORE)
 
-- [ ] **CORE-01**: 사용자가 텍스트로 입력한 티켓을 파싱하여 버그 설명을 추출한다
-- [ ] **CORE-02**: 코드베이스에서 관련 파일/함수를 증거로 수집한다 (Glob/Grep/Read)
-- [ ] **CORE-03**: 수집된 증거를 기반으로 근본 원인을 탐색한다 (병렬 에이전트)
-- [ ] **CORE-04**: 근본 원인 분석을 바탕으로 수정 계획을 수립한다
-- [ ] **CORE-05**: 수정 계획에 따라 코드를 자동으로 수정한다
-- [ ] **CORE-06**: 테스트 실행으로 수정이 동작하는지 검증한다
-- [ ] **CORE-07**: 검증 실패 시 최대 3회 재시도하며, 매회 원인 분석 후 전략을 변경한다 (full → targeted → relaxed)
-- [ ] **CORE-08**: 워크플로우 단계가 순차적으로 실행된다 (증거수집 → 탐색/계획/구현 → 검증)
+- [x] **CORE-01**: 사용자가 텍스트로 입력한 티켓을 파싱하여 버그 설명을 추출한다
+- [x] **CORE-02**: 코드베이스에서 관련 파일/함수를 증거로 수집한다 (Glob/Grep/Read)
+- [x] **CORE-03**: 수집된 증거를 기반으로 근본 원인을 탐색한다 (병렬 에이전트)
+- [x] **CORE-04**: 근본 원인 분석을 바탕으로 수정 계획을 수립한다
+- [x] **CORE-05**: 수정 계획에 따라 코드를 자동으로 수정한다
+- [x] **CORE-06**: 테스트 실행으로 수정이 동작하는지 검증한다
+- [x] **CORE-07**: 검증 실패 시 최대 3회 재시도하며, 매회 원인 분석 후 전략을 변경한다 (full → targeted → relaxed)
+- [x] **CORE-08**: 워크플로우 단계가 순차적으로 실행된다 (증거수집 → 탐색/계획/구현 → 검증)
 
 ### 분류 (CLSF)
 
@@ -79,14 +79,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLUG-01 | Phase 1 | Complete |
 | PLUG-02 | Phase 1 | Complete |
 | PLUG-03 | Phase 1 | Complete |
-| CORE-01 | Phase 1 | Pending |
-| CORE-02 | Phase 1 | Pending |
-| CORE-03 | Phase 1 | Pending |
-| CORE-04 | Phase 1 | Pending |
-| CORE-05 | Phase 1 | Pending |
-| CORE-06 | Phase 1 | Pending |
-| CORE-07 | Phase 1 | Pending |
-| CORE-08 | Phase 1 | Pending |
+| CORE-01 | Phase 1 | Complete |
+| CORE-02 | Phase 1 | Complete |
+| CORE-03 | Phase 1 | Complete |
+| CORE-04 | Phase 1 | Complete |
+| CORE-05 | Phase 1 | Complete |
+| CORE-06 | Phase 1 | Complete |
+| CORE-07 | Phase 1 | Complete |
+| CORE-08 | Phase 1 | Complete |
 | CLSF-01 | Phase 1 | Pending |
 | CLSF-02 | Phase 1 | Pending |
 | CLSF-03 | Phase 1 | Pending |

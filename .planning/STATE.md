@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-non-ui-02-PLAN.md
-last_updated: "2026-03-12T05:53:02.428Z"
+stopped_at: Completed 01-non-ui-03-PLAN.md
+last_updated: "2026-03-12T05:53:43Z"
 last_activity: 2026-03-12 — ROADMAP.md 생성 완료
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-non-ui P01 | 219s | 2 tasks | 19 files |
 | Phase 01-non-ui P02 | 2m | 1 tasks | 2 files |
+| Phase 01-non-ui P03 | 3m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,8 @@ Recent decisions affecting current work:
 - [Phase 01-non-ui]: lib/schemas/classification.md 내용을 references/classification.md에 병합 — 단일 진실의 원천 확보
 - [Phase 01-non-ui]: v0.3 7차원 가중치 기반 분류 알고리즘을 references/classification.md 공식 버전으로 채택
 - [Phase 01-non-ui]: SKILL.md 500줄 이하 유지 원칙 확립 — 상세 내용은 references/로 분리
+- [Phase 01-non-ui P03]: 커맨드-오케스트레이터 분리 — 커맨드는 진입점, 로직은 phase-orchestrator.md에 위임
+- [Phase 01-non-ui P03]: full→targeted→relaxed 3단계 재시도 전략 확정 — 점진적 범위 확대로 불필요한 변경 최소화
 
 ### Pending Todos
 
@@ -81,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T05:53:02.425Z
-Stopped at: Completed 01-non-ui-02-PLAN.md
+Last session: 2026-03-12T05:53:43Z
+Stopped at: Completed 01-non-ui-03-PLAN.md
 Resume file: None
