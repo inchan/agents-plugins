@@ -76,6 +76,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| PLUG-01 | Phase 1 | Pending |
+| PLUG-02 | Phase 1 | Pending |
+| PLUG-03 | Phase 1 | Pending |
 | CORE-01 | Phase 1 | Pending |
 | CORE-02 | Phase 1 | Pending |
 | CORE-03 | Phase 1 | Pending |
@@ -95,9 +98,6 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCOR-02 | Phase 3 | Pending |
 | SCOR-03 | Phase 3 | Pending |
 | SCOR-04 | Phase 3 | Pending |
-| PLUG-01 | Phase 4 | Pending |
-| PLUG-02 | Phase 4 | Pending |
-| PLUG-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 22 total
@@ -106,4 +106,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-12 after initial definition*
+*Last updated: 2026-03-12 — traceability updated after roadmap creation (PLUG → Phase 1)*
