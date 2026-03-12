@@ -4,7 +4,7 @@ milestone: v0.2
 milestone_name: milestone
 status: planning
 stopped_at: Completed 01-non-ui-04-PLAN.md
-last_updated: "2026-03-12T05:58:31.944Z"
+last_updated: "2026-03-12T06:03:02.911Z"
 last_activity: 2026-03-12 — ROADMAP.md 생성 완료
 progress:
   total_phases: 3
