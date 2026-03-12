@@ -27,7 +27,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### UI 브라우저 자동화 (UIBR)
 
 - [x] **UIBR-01**: UI 이슈는 브라우저 자동화 도구로 재현하고 Before 스크린샷을 캡처한다
-- [ ] **UIBR-02**: 수정 후 After 스크린샷을 캡처하여 Before와 비교 검증한다
+- [x] **UIBR-02**: 수정 후 After 스크린샷을 캡처하여 Before와 비교 검증한다
 - [x] **UIBR-03**: 브라우저 도구를 병렬로 크로스체크한다 (가용한 도구 모두 활용)
 - [x] **UIBR-04**: 브라우저 도구 폴백 체인을 지원한다 (Playwright → Chrome DevTools → agent-browser)
 
@@ -91,7 +91,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLSF-02 | Phase 1 | Complete |
 | CLSF-03 | Phase 1 | Complete |
 | UIBR-01 | Phase 2 | Complete |
-| UIBR-02 | Phase 2 | Pending |
+| UIBR-02 | Phase 2 | Complete |
 | UIBR-03 | Phase 2 | Complete |
 | UIBR-04 | Phase 2 | Complete |
 | SCOR-01 | Phase 3 | Pending |
