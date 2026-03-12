@@ -1,88 +1,155 @@
 # Ticket Classification: UI vs Non-UI
 
+Complete 7-dimension classification algorithm for ticket type determination.
+
+---
+
 ## Classification Algorithm
 
-### Priority 1: Explicit Override
+The classifier uses a multi-dimensional signal analysis approach across 7 signal dimensions.
+
+### Signal Dimension 1: Explicit Override
 
 If user provides `--type ui` or `--type non-ui`, use that classification directly with confidence 1.0.
 
-### Priority 2: File-Based Signals
+### Signal Dimension 2: Weighted Keyword Category Matching
 
-Score based on affected file types:
+Score ticket text against categorized keyword sets with diminishing returns per category.
 
-| File Pattern | Signal | Weight |
-|-------------|--------|--------|
-| `*.css`, `*.scss`, `*.less`, `*.styled.*` | UI | +0.3 |
-| `*.tsx`, `*.jsx` (with render/return JSX) | UI | +0.2 |
-| `*.vue`, `*.svelte` (template section) | UI | +0.2 |
-| `*.test.ts`, `*.spec.ts` (non-visual) | Non-UI | +0.1 |
-| `*.py`, `*.go`, `*.rs` (backend) | Non-UI | +0.3 |
-| `*api*`, `*route*`, `*handler*` | Non-UI | +0.2 |
-| `*controller*`, `*service*`, `*model*` | Non-UI | +0.2 |
+**UI Keyword Categories** (category → weight):
 
-### Priority 3: Keyword Signals
+| Category | Weight | Example Keywords |
+|----------|--------|-----------------|
+| `css_styling` | 0.8 | css, color, font, padding, margin, border, flexbox, tailwind |
+| `layout` | 0.7 | layout, alignment, responsive, breakpoint, viewport, mobile, sidebar |
+| `rendering_visual` | 0.6 | render, visual, display, visible, hidden, blank, overlapping, truncated |
+| `ui_components` | 0.5 | button, modal, dialog, dropdown, form, tooltip, spinner, card, menu |
+| `browser_specific` | 0.6 | chrome, firefox, safari, dom, html, canvas, svg, cross-browser |
+| `screenshot_visual_evidence` | 0.9 | screenshot, visual bug, visual regression, figma, mockup, design |
+| `interaction` | 0.4 | click, hover, focus, drag, scroll, tap, keyboard, cursor |
+| `frontend_tech` | 0.3 | react, vue, angular, jsx, tsx, component, hook, redux |
+| `accessibility` | 0.5 | a11y, aria, screen reader, wcag, contrast, tab order |
 
-Score based on ticket description keywords:
+**Non-UI Keyword Categories** (category → weight):
 
-**UI indicators** (+0.15 each):
-- layout, alignment, margin, padding, spacing
-- color, font, typography, style, theme
-- responsive, viewport, mobile, desktop, breakpoint
-- render, display, visible, hidden, overflow
-- animation, transition, hover, focus
-- screenshot, visual, pixel, design
-- button, modal, dialog, dropdown, menu, tooltip
-- CSS, HTML, DOM, element
+| Category | Weight | Example Keywords |
+|----------|--------|-----------------|
+| `backend` | 0.7 | api, endpoint, database, query, migration, authentication, token |
+| `infrastructure` | 0.8 | deploy, docker, kubernetes, aws, terraform, monitoring, logging |
+| `data_logic` | 0.7 | calculation, algorithm, race condition, memory leak, exception, timeout |
+| `cli_system` | 0.6 | cli, terminal, cron, daemon, queue, kafka, redis, cache |
 
-**Non-UI indicators** (+0.15 each):
-- API, endpoint, request, response, status code
-- database, query, migration, schema
-- error, exception, crash, timeout, 500, 404
-- authentication, authorization, token, session
-- performance, memory, CPU, latency
-- data, payload, serialization, parsing
-- log, metric, monitoring
-- CLI, command, argument, flag
+**Scoring**: Each category contributes once with a multiplier based on match count:
+- 1 match: full weight
+- 2 matches: weight × 1.3
+- 3+ matches: weight × 1.6 (capped)
 
-### Classification Decision
+### Signal Dimension 3: Regex Contextual Pattern Matching
+
+Match contextual phrases that strongly indicate UI issues:
+
+| Pattern | Weight | Label |
+|---------|--------|-------|
+| `looks/appears/displays wrong/broken/incorrect` | 0.8 | visual_description |
+| `css/style/class not applied/working/loading` | 0.9 | css_issue |
+| `screen/page/view is blank/empty/white` | 0.7 | blank_screen |
+| `responsive/mobile/tablet layout/view` | 0.8 | responsive_issue |
+| `z-index/stacking/layer issue/problem` | 0.9 | stacking_issue |
+| `.png/.jpg/.gif/.svg` file references | 0.7 | media_attachment |
+| `dark/light mode/theme` | 0.6 | theme_issue |
+| `hover/focus/active state` | 0.8 | interaction_state |
+
+### Signal Dimension 4: Label Analysis
+
+Direct label matching against known UI and non-UI label sets:
+- **UI labels** (+1.0 each): `ui`, `frontend`, `css`, `design`, `visual`, `ux`, `accessibility`, `a11y`, `responsive`, `browser`, `layout`
+- **Non-UI labels** (+1.0 each): `backend`, `api`, `database`, `infra`, `devops`, `security`, `performance`, `cli`, `data`
+
+### Signal Dimension 5: Attachment & Screenshot Heuristics
+
+- Image attachments (.png, .jpg, .gif, .svg, .webp): +0.8 UI score per image
+- Video attachments (.mp4, .mov, .webm): +0.6 UI score per video
+
+### Signal Dimension 6: Environment / Browser Hints
+
+Browser-related environment keys (browser, user_agent, resolution, viewport, device): +0.5 UI score each.
+
+### Signal Dimension 7: Interaction Verb Density in Reproduction Steps
+
+Count interaction verbs (click, tap, hover, scroll, drag, navigate, etc.) in steps-to-reproduce:
+- 2+ verbs: boost UI score by 0.4 × min(count, 5)
+
+---
+
+## Classification Decision
 
 ```
-ui_score = sum(ui_signals)
-non_ui_score = sum(non_ui_signals)
+ui_score = sum(all_ui_signals)
+non_ui_score = sum(all_non_ui_signals)
 total = ui_score + non_ui_score
 
 if total == 0:
-  type = "non-ui"  # default
-  confidence = 0.5
-else:
-  if ui_score > non_ui_score:
+    type = "unknown", confidence = 0.0
+
+elif ui_ratio (ui_score / total) >= 0.65:
     type = "ui"
-    confidence = ui_score / total
-  else:
+    confidence = ui_ratio
+
+elif ui_ratio <= 0.35:
     type = "non-ui"
-    confidence = non_ui_score / total
+    confidence = 1.0 - ui_ratio
+
+else:  # ambiguous (0.35 < ui_ratio < 0.65)
+    type = whichever score is higher
+    confidence = abs(ui_ratio - 0.5) * 2  (low confidence)
 ```
 
-### Confidence Thresholds
+## Confidence Thresholds & Actions
 
-| Confidence | Action |
-|-----------|--------|
-| >= 0.8 | High confidence, proceed automatically |
-| 0.6 - 0.8 | Medium confidence, note uncertainty |
-| < 0.6 | Low confidence, consider asking user |
+| Confidence | Level | Action |
+|-----------|-------|--------|
+| >= 0.8 | High | Proceed automatically |
+| 0.6 – 0.8 | Medium | Proceed, note uncertainty in log |
+| 0.5 – 0.6 | Low | Proceed with `[WARN] E_CLASSIFY` logged |
+| < 0.5 | Very Low | Default to non-UI, log warning, collect more evidence |
 
-## Classification Impact
+## Classification Output Structure
 
-The ticket type determines:
-1. **Evidence collection** — UI: capture screenshots; Non-UI: capture logs/errors
-2. **Verification method** — UI: browser automation; Non-UI: test execution
-3. **Tool selection** — UI: Playwright MCP / Chrome DevTools; Non-UI: test runner
+```json
+{
+  "ticket_type": "ui" | "non-ui",
+  "confidence": 0.92,
+  "ui_score": 5.6,
+  "non_ui_score": 0.7,
+  "signals": [
+    "ui:css_styling(css, color, background)",
+    "ui:ui_components(button, modal)",
+    "ui:screenshot_visual_evidence(screenshot)",
+    "pattern:visual_description",
+    "label:frontend",
+    "attachment:image(bug.png)",
+    "env:browser",
+    "steps:interaction_verbs(3)",
+    "non_ui:backend(api)"
+  ],
+  "reasoning": "Classified as UI issue (ui_score=5.6 vs non_ui=0.7). Strong UI signals across 8 indicators."
+}
+```
+
+## Classification Impact on Subsequent Phases
+
+| Aspect | UI Ticket | Non-UI Ticket |
+|--------|-----------|---------------|
+| **Phase 3 (Explore)** | Component tree + CSS cascade analysis agent | Standard code tracing agents |
+| **Phase 5 (Implement)** | Visual, responsive, accessibility focus | Logic, data, API correctness focus |
+| **Phase 6 (Verify)** | Tests + browser automation (Playwright MCP / Chrome DevTools / agent-browser) | Tests only |
+| **Phase 6 fallback** | DOM analysis if browser tools unavailable | N/A |
 
 ---
 
 ## Classification Output Schema
 
-Defines the output structure for ticket type classification (UI vs non-UI).
+Defines the typed output structure for ticket type classification.
 
 ### `TicketClassification`
 
