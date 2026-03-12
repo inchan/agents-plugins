@@ -1,49 +1,98 @@
 # Phase 4: Verification
 
-> Sequential phase 4 of 4. Requires Implementation output. Retries up to 3 times on failure.
+> Sequential phase 6 of 6. Requires Implementation output. Retries up to 3 times on failure.
+> On retry, strategy escalates: full → targeted → relaxed. Phases 1-4 outputs remain immutable.
 
 ## Purpose
 
 Validate that the implementation correctly resolves the reported bug through automated tests and, for UI tickets, visual comparison using browser automation.
 
-## Inputs (from Phase 3)
+## Inputs (from Phase 5 Implementation)
 
 - `ticket_type`: "ui" or "non-ui"
 - `files_modified`: List of changed files
 - `tests_added`: Test files to execute
 - `change_summary`: What was changed
-- `verification_strategy`: From Phase 2
+- `verification_strategy`: From Phase 4 Plan
+- `retry_context` (optional — only on retry attempts):
+  - `attempt`: 1-3
+  - `strategy`: "full" | "targeted" | "relaxed"
+  - `failure_reason`: What failed in the previous attempt
+  - `failed_test`: Specific test that failed
+  - `previous_changes`: Phase 5 output from previous attempt
 
 ## Retry Policy
 
 ```
 Max retries: 3
-On failure:
-  1. Analyze failure reason
-  2. Return to Implementation phase for targeted fix
-  3. Re-run verification
+Strategy escalation: full → targeted → relaxed
 
 Retry flow:
-  Attempt 1 → FAIL → fix → Attempt 2 → FAIL → fix → Attempt 3 → FAIL → REPORT
+  Attempt 1 (full)     → FAIL → Retry 1/3 -- 전략: targeted
+  Attempt 2 (targeted) → FAIL → Retry 2/3 -- 전략: relaxed
+  Attempt 3 (relaxed)  → FAIL → All attempts exhausted -> FAILED
+
+On failure:
+  1. Analyze failure reason in detail
+  2. Return to Implementation phase with retry_context
+  3. Implementation applies strategy-appropriate fix
+  4. Re-run verification
 ```
+
+**Phases 1-4 outputs remain immutable during all retries.**
 
 ## Procedure
 
+### Step 0: Check Retry Context (if retry_context present)
+
+If `retry_context` is provided, apply strategy-specific behavior before running verification:
+
+```
+strategy = retry_context.strategy
+
+if strategy == "targeted":
+  # Targeted fix: focus only on the specific failure point
+  # - Read retry_context.failed_test to understand what exactly failed
+  # - Check only files modified that relate to the failure
+  # - Do NOT re-verify passing tests immediately (focus on failing ones first)
+  Focus: retry_context.failed_test and retry_context.failure_reason
+
+elif strategy == "relaxed":
+  # Relaxed approach: full reconsideration of verification method
+  # - The implementation may have taken a different path entirely
+  # - Re-run full verification with fresh perspective
+  # - Consider alternative verification approaches if standard tests are insufficient
+  Focus: Full verification with adjusted expectations based on new implementation approach
+```
+
 ### Step 1: Run Automated Tests
 
-Execute all relevant tests:
+Execute all relevant tests in order:
 
 ```bash
-# Run the specific regression test added in Phase 3
+# 1. Run the specific regression test added in Phase 3
 <test runner> <test file>
 
-# Run the broader test suite for the affected area
+# 2. Run the broader test suite for the affected area
 <test runner> <affected directory>
+
+# 3. Run the assertion results analysis
+# - Check which assertions passed and failed
+# - Note any unexpected assertion values
+
+# 4. Analyze test logs
+# - Look for error messages, stack traces, unexpected output
+# - Identify root cause of any failure
+
+# 5. Check side effects
+# - Verify no previously passing tests are now failing
+# - Run the full test suite if any doubts exist
+<test runner> --all  # or equivalent
 ```
 
 **Pass criteria:**
 - All new tests pass
-- No existing tests broken
+- No existing tests broken (side effect check)
 - Exit code 0
 
 ### Step 2: Type-Specific Verification
@@ -78,18 +127,37 @@ UI Verification Checklist:
 
 #### For Non-UI Tickets — Functional Verification
 
-1. **Test execution** — All tests pass
-2. **Manual verification** — Run the reproduction steps
-3. **Edge case check** — Test boundary conditions
+1. **Test execution** — Run all relevant tests; check assertion results
+
+2. **Assertion result analysis:**
+   - Verify expected values match actual values
+   - Identify any partial passes (some assertions pass, others fail)
+
+3. **Log analysis:**
+   - Review test output logs for unexpected errors or warnings
+   - Look for stack traces indicating root cause
+
+4. **Side effect check:**
+   - Run the broader test suite to confirm no regressions
+   - Pay attention to tests in related modules
+
+5. **Edge case verification:**
+   - Test boundary conditions specified in Phase 4 plan
+   - Verify error handling paths work correctly
 
 ```
 Non-UI Verification Checklist:
-  □ Regression test passes
-  □ Existing test suite passes
+  □ Regression test passes (new tests added in Phase 3)
+  □ Existing test suite passes (no regressions / side effects)
+  □ Assertion results match expected values
+  □ Logs show no unexpected errors
   □ Reproduction steps no longer trigger bug
   □ Edge cases handled correctly
   □ No performance regression
 ```
+
+**For UI tickets** — Browser automation is integrated in Phase 2 (browser-reproducer). See `../browser-automation.md`.
+<!-- Phase 2 UI: browser-reproducer 통합 예정 — Playwright MCP 통합 전까지 코드 수준 폴백 사용 -->
 
 ### Step 3: Verification Report
 
@@ -165,26 +233,42 @@ Follow the standard error handling patterns from [workflow-logger.md](../workflo
 
 ### Retry Strategies
 
-Each retry attempt uses a different strategy:
+Each retry attempt uses a different strategy. Strategy determines how Phase 5 (Implement) behaves on re-execution:
 
 ```
-Attempt 1: Full verification (all tests + visual if UI)
+Attempt 1 (strategy: full):
+  Full verification — all tests + visual if UI
+  → Implementation uses original plan unchanged
   ↓ failure
-  [WARN ] [VERIFY] +<time> — Verification attempt 1/3 failed: <reason>
-  [INFO ] [VERIFY] +<time> — Retrying with strategy: targeted_fix
+  [WARN ] [VERIFY] +<time> -- Attempt 1/3 failed: <reason>. Retry strategy: targeted
+  [INFO ] [VERIFY] +<time> -- Retry 1/3 -- 전략: targeted
 
-Attempt 2: Targeted fix + re-verify (fix specific failure, re-run)
+Attempt 2 (strategy: targeted):
+  Targeted fix — identify specific failure, fix only that part
+  → Implementation: read failure_reason, modify only failing file/function
+  → Preserve all working changes from Attempt 1
   ↓ failure
-  [WARN ] [VERIFY] +<time> — Verification attempt 2/3 failed: <reason>
-  [INFO ] [VERIFY] +<time> — Retrying with strategy: relaxed_verification
+  [WARN ] [VERIFY] +<time> -- Attempt 2/3 failed: <reason>. Retry strategy: relaxed
+  [INFO ] [VERIFY] +<time> -- Retry 2/3 -- 전략: relaxed
 
-Attempt 3: Relaxed verification (broader tolerances, smoke test)
+Attempt 3 (strategy: relaxed):
+  Approach change — reconsider entire implementation strategy
+  → Implementation: try different files, use alternative algorithm, apply workaround
+  → Phases 1-4 remain immutable; only Phase 5-6 re-execute
   ↓ failure
-  [ERROR] [VERIFY] +<time> — All verification attempts exhausted
+  [ERROR] [VERIFY] +<time> -- All attempts exhausted -> FAILED
     Code: E_VERIFY
     Context: 3/3 attempts failed
     Recovery: Manual review required
 ```
+
+**Verification behavior by strategy:**
+
+| Strategy | Test Focus | Scope | Action on Failure |
+|----------|-----------|-------|-------------------|
+| `full` | All tests + regression | Complete | Return full failure report |
+| `targeted` | failed_test only first, then expand | Specific failure point | Focus analysis on failure_reason |
+| `relaxed` | Full re-verification | Complete | Accept alternative implementation approach |
 
 ### Logging Examples
 

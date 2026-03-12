@@ -160,9 +160,11 @@ Output: {
 Output: {
   status: "pass" | "fail"
   attempt: int  // 1-3
+  strategy: "full" | "targeted" | "relaxed"  // strategy used in this attempt
   test_results: TestResult[]
   visual_comparison: VisualResult | null  // UI only
   failure_reason: string | null  // only on fail
+  failed_test: string | null  // specific test that failed
   verification_quality_score: float
 }
 ```
@@ -185,11 +187,31 @@ Every phase must execute. Even if the ticket is obviously UI or non-UI, classifi
 
 Only the VERIFY → IMPLEMENT → VERIFY loop retries. Phases 1-4 never re-execute.
 
-On retry:
-1. Keep all Phase 1-4 outputs intact
-2. Phase 5 receives failure context from Phase 6: `{ failure_reason, failed_test, suggestion }`
-3. Phase 5 applies a **targeted correction** — not a full re-implementation
-4. Phase 6 re-runs full verification
+**Phases 1-4 outputs remain immutable during retries. Only Phases 5-6 re-execute.**
+
+On retry, apply the 3-stage strategy progression:
+
+| Attempt | Strategy | Action |
+|---------|----------|--------|
+| 1 | `full` | 원래 계획 그대로. `verification_strategy` 변경 없음 |
+| 2 | `targeted` | `failure_reason`에서 실패 지점 식별. 해당 파일/함수만 수정. 이전 정상 변경은 유지 |
+| 3 | `relaxed` | 접근 방식 자체를 변경. 다른 파일 수정, 우회 전략, 또는 대안 알고리즘 적용 |
+
+Each retry begins with a log entry:
+```
+[INFO ] [VERIFY] +<time> -- Retry N/3 -- 전략: <targeted|relaxed>
+```
+
+Phase 5 receives failure context from Phase 6 on each retry:
+```
+retry_context = {
+  attempt: <1|2|3>,
+  strategy: <"full"|"targeted"|"relaxed">,
+  failure_reason: <string>,
+  failed_test: <specific test that failed>,
+  previous_changes: <Phase 5 output from previous attempt>
+}
+```
 
 ### Rule 4: Progress Reporting at Boundaries
 
@@ -291,19 +313,35 @@ for phase in [EVIDENCE, CLASSIFY, EXPLORE, PLAN, IMPLEMENT, VERIFY]:
 ### Step 3: Handle Verification Result
 
 ```
+def get_retry_strategy(retry_count):
+    if retry_count == 1: return "full"
+    if retry_count == 2: return "targeted"
+    if retry_count == 3: return "relaxed"
+
 def handle_verification_result(output, state):
     if output.status == "pass":
         state.phase = "DONE"
         render_final_report(state)
     elif state.retry_count < state.max_retries:
         state.retry_count += 1
-        log_retry(state.retry_count, output.failure_reason)
+        strategy = get_retry_strategy(state.retry_count)
+
+        # Log retry with strategy (한글+영어 혼용 포맷)
+        log(f"[WARN ] [VERIFY] +<time> -- Attempt {state.retry_count-1}/3 failed: {output.failure_reason}. Retry strategy: {strategy}")
+        log(f"[INFO ] [VERIFY] +<time> -- Retry {state.retry_count}/3 -- 전략: {strategy}")
+
+        # Determine implementation behavior based on strategy:
+        # - full (attempt 1): Re-execute with original plan unchanged
+        # - targeted (attempt 2): Fix only the specific failure point; preserve working changes
+        # - relaxed (attempt 3): Change approach entirely; try different files/functions/algorithms
 
         # Re-execute IMPLEMENT with failure context
+        # IMPORTANT: Phases 1-4 outputs remain immutable. Only re-execute Phase 5+.
         implement_input = {
             ...state.phase_outputs["PLAN"],
             retry_context: {
                 attempt: state.retry_count,
+                strategy: strategy,
                 failure_reason: output.failure_reason,
                 failed_test: output.failed_test,
                 previous_changes: state.phase_outputs["IMPLEMENT"]
@@ -317,6 +355,7 @@ def handle_verification_result(output, state):
         handle_verification_result(new_verify, state)  # recursive
     else:
         state.phase = "FAILED"
+        log(f"[ERROR] [VERIFY] +<time> -- All attempts exhausted -> FAILED")
         render_final_report(state)
 ```
 
