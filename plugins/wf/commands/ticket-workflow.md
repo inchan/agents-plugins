@@ -93,6 +93,24 @@ Agent B (evidence-searcher):
 
 After agents return: synthesize findings into `evidence_report`.
 
+After evidence-searcher agents return:
+  If ticket_type == "ui" OR classification hint suggests UI:
+    Dispatch browser-reproducer agent:
+
+```
+Agent C (browser-reproducer):
+  Task: "Reproduce UI bug at <url> with viewport <viewport>: <reproduction_steps>"
+  Tools: Bash, Read, Glob, Grep, WebFetch + available MCP tools
+  Timeout: 19 minutes 59 seconds
+```
+
+Merge browser-reproducer output into evidence_report:
+```
+evidence_report.screenshot_references = agent_c.screenshots
+evidence_report.browser_method = agent_c.method
+evidence_report.reproduction_status = agent_c.reproduction_status
+```
+
 **Log:**
 ```
 [INFO ] [EVIDENCE  ] +<time> -- Phase started: Evidence Collection
@@ -202,6 +220,8 @@ Run tests and validate the fix.
 [INFO ] [VERIFY    ] +<time> -- Phase completed: Verification (score: <N>%, attempt <N>/3)
 ```
 
+For UI tickets: Also run browser-based Before/After comparison. See `verification.md` Step 2 UI section.
+
 See full procedure: `skills/ticket-workflow/references/phases/verification.md`
 
 ---
@@ -280,3 +300,4 @@ Agents available for this workflow:
 | `planner` | `agents/planner.md` | Phase 4 | Read, Glob, Grep |
 | `implementer` | `agents/implementer.md` | Phase 5 | Bash, Read, Edit, Write, Glob, Grep |
 | `verifier` | `agents/verifier.md` | Phase 6 | Bash, Read, Glob, Grep |
+| `browser-reproducer` | `agents/browser-reproducer.md` | Phase 1 (UI tickets), Phase 6 (UI verify) | Bash, Read, Glob, Grep, WebFetch |
