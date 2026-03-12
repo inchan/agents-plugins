@@ -28,13 +28,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. 검증 실패 시 콘솔에 "Retry 2/3 — 전략: targeted" 형태로 재시도 전략 변경이 표시된다
   4. plugins/wf/ 하나의 경로에 표준 플러그인 구조(.claude-plugin/plugin.json + skills/ + agents/ + references/)가 존재하며 SKILL.md는 500줄 이하다
   5. plugins/ticket-workflow/ 구(舊) 경로가 제거되거나 wf/로 통합 완료 상태다
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: v0.2/v0.3 구현체 통합 — plugins/wf/ 단일 구조로 병합
-- [ ] 01-02: SKILL.md + references/ 분리 구조 완성 — 오케스트레이터/페이즈 상세/분류 알고리즘
-- [ ] 01-03: Non-UI 완전 워크플로우 구현 — CORE-01~08 6단계 + 재시도 전략
-- [ ] 01-04: 분류 시스템 구현 — CLSF-01~03 (7가지 신호, 신뢰도, UI/Non-UI 분기)
+- [ ] 01-01-PLAN.md — v0.2/v0.3 구현체 통합: plugins/wf/ 단일 구조로 병합 + 구 경로 삭제 (Wave 1)
+- [ ] 01-02-PLAN.md — SKILL.md + references/ 분리 구조 완성: 분류 알고리즘을 references/로 위임 (Wave 2)
+- [ ] 01-03-PLAN.md — Non-UI 완전 워크플로우 구현: /ticket-workflow 커맨드 + 6단계 + 재시도 전략 (Wave 2)
+- [ ] 01-04-PLAN.md — 분류 시스템 확장: sub_type + 7가지 신호 + 신뢰도 + UI/Non-UI 분기 (Wave 3)
 
 ### Phase 2: UI 브라우저 자동화
 **Goal**: UI 유형으로 분류된 버그 티켓에서 브라우저 도구로 재현하고 Before/After 스크린샷으로 시각적 검증이 완료된다
@@ -73,6 +73,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 플러그인 구조 통합 + Non-UI 핵심 워크플로우 | 0/4 | Not started | - |
+| 1. 플러그인 구조 통합 + Non-UI 핵심 워크플로우 | 0/4 | Planned | - |
 | 2. UI 브라우저 자동화 | 0/3 | Not started | - |
 | 3. 점수 시스템 + 리포트 완성 | 0/2 | Not started | - |
