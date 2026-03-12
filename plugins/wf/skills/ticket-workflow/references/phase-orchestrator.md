@@ -260,6 +260,26 @@ After classification (Phase 2), both `ticket_type` and `sub_type` are propagated
 
 **Phase 6 fallback (UI only):** 브라우저 도구 미사용 시 DOM 분석 / 코드 레벨 폴백
 
+### Browser Cross-Check Strategy
+
+가용 도구 수에 따른 실행 전략:
+
+| Available Tools | Strategy | Execution |
+|-----------------|----------|-----------|
+| 0 | code-analysis only | 코드 수준 분석 (항상 가용) |
+| 1 | single-tool | 해당 도구로 단독 실행 |
+| 2+ | parallel cross-check | Agent 병렬 디스패치, 결과 비교 |
+
+병렬 크로스체크 절차:
+1. 가용 도구 2개 이상 감지 시 Agent 도구로 병렬 디스패치
+2. 각 Agent는 동일한 reproduction steps를 서로 다른 도구로 실행
+3. 결과 집계:
+   - 두 결과 일치 → reproduction_confidence = "HIGH"
+   - 두 결과 불일치 → reproduction_confidence = "MEDIUM"
+     → [WARN] [BROWSER] -- Cross-check mismatch: tools disagree
+     → 두 결과 모두 evidence_report에 포함
+4. 크로스체크는 선택적 최적화 — 필수가 아님
+
 **Passing sub_type forward:** Phase 2 output의 `sub_type` 값은 phases 3, 5, 6에 전달되어 에이전트 지시에 사용된다:
 
 ```
@@ -415,6 +435,26 @@ After agents return:
 1. Read all key files identified by agents
 2. Synthesize findings into the phase output
 3. Log agent results at DEBUG level
+
+---
+
+### UI Screenshot Data Flow
+
+EVIDENCE → VERIFY 전달 필드 (ticket_type == "ui" 전용):
+
+```
+phase_outputs["EVIDENCE"].screenshot_references = [
+  { type: "before_full", path: "/tmp/wf_{ticket_id}/before_full.png" },
+  { type: "before_element", path: "/tmp/wf_{ticket_id}/before_element.png" }
+]
+phase_outputs["EVIDENCE"].browser_method = "browser:playwright_mcp" | ...
+phase_outputs["EVIDENCE"].reproduction_status = "success" | "partial" | "failed"
+```
+
+VERIFY에서 screenshot_references 및 위 필드를 참조하여:
+- 동일 도구/URL/steps로 After 스크린샷 캡처
+- Before/After 비교 실행
+- visual_comparison 결과를 verification_report에 포함
 
 ---
 
