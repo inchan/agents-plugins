@@ -1,59 +1,43 @@
 ---
-name: agent-delegation
-description: AI CLI(codex, gemini, qwen, claude)에게 작업 위임. 한국어 트리거: 위임, 부탁, 맡겨, 다른 AI에게 물어봐
+name: delegation
+description: >
+  AI CLI(codex, gemini, claude, qwen, kimi)에게 작업 위임. 3개 전문 에이전트 + 1개 만능 에이전트로 구성.
+  한국어 트리거: 위임, 부탁, 맡겨, 다른 AI에게 물어봐, codex로, gemini로, kimi로, qwen으로
+  Do NOT trigger for simple tasks that Claude can handle directly.
 ---
 
 # AI CLI 위임
 
-> **⚠️ 우선순위**: MCP(other-agents) 대신 이 스킬(`/delegate`)을 사용하세요.
+3개 전문 에이전트 + 1개 만능 에이전트로 작업을 위임합니다.
 
-## 목적
+## 서브에이전트
 
-다른 AI CLI에게 작업을 위임하고 결과를 받아옵니다.
+| 에이전트 | 전담 CLI | 역할 |
+|----------|----------|------|
+| `codex` | codex | 깊은 추론 — 아키텍처, 코드 리뷰, 버그 조사, 리팩토링 |
+| `gemini` | gemini | 검색/시각 — 웹 검색, E2E 테스트, 문서 작성, 장시간 작업(10분+) |
+| `claude-code` | claude | 범용 코딩 — 일반 구현, 오케스트레이션, 균형잡힌 분석 |
+| `generalist` | **자동 선택** | 만능 — 번역(→qwen), 장문 코딩(→kimi), 기타 특수 작업 |
 
-## 기능
+## 선택 기준
 
-1. **자동 CLI 선택** - 프롬프트 키워드 기반 최적 CLI 선택
-2. **폴백 메커니즘** - 실패 시 자동으로 다른 CLI로 재시도
-3. **결과 파싱 표준화** - CLI별 출력을 통일된 형식으로 변환
+| 우선순위 | 키워드 | 에이전트 |
+|---------|--------|----------|
+| 1 | 검색, search, 최신, 뉴스, playwright, e2e, 크롤링 | `gemini` |
+| 2 | 아키텍처, 설계, 리뷰, 분석, 복잡한, 추론, 계획 | `codex` |
+| 3 | 번역, translate, 중국어, 일본어, kimi, moonshot, 대용량, 장문 | `generalist` |
+| 4 | (기본값) | `claude-code` |
 
-## CLI 선택 기준
+## 사용 흐름
 
-| CLI | 역할 | 자동 선택 키워드 |
-|-----|------|-----------------|
-| `codex` | 깊은 추론 | 아키텍처, 설계, 리뷰, 분석, 복잡한, 추론 |
-| `gemini` | 검색/시각 | 검색, 최신, playwright, e2e, 크롤링 |
-| `qwen` | 다국어 | 번역, translate, 중국어, 일본어 |
-| `claude` | 균형 (기본) | (위 키워드 없을 때 기본값) |
-
-## 사용법
-
-```
-/delegate "프롬프트"              # 자동 CLI 선택
-/delegate --cli codex "프롬프트"  # CLI 수동 지정
-```
-
-## 폴백 체인
-
-| 1차 CLI | 실패 시 폴백 순서 |
-|---------|------------------|
-| codex | gemini → claude |
-| gemini | codex → claude |
-| qwen | claude |
-| claude | codex |
-
-## 실행 방식
-
-각 CLI는 bash로 직접 실행합니다. CLI별 명령어는 `references/` 문서를 참조하세요.
-
-- [codex.md](references/codex.md) - Codex (장시간 조건부)
-- [claude.md](references/claude.md) - Claude (장시간 ❌)
-- [gemini.md](references/gemini.md) - Gemini (장시간 ✅)
-- [qwen.md](references/qwen.md) - Qwen (장시간 ❌)
+1. 사용자가 작업을 설명하면 스킬이 적합한 에이전트를 선택
+2. 사용자가 CLI를 직접 지정할 수도 있음 ("codex로 리뷰해줘", "gemini로 검색해줘")
+3. 선택된 에이전트를 spawn하여 작업 실행
+4. 에이전트가 결과를 보고
 
 ## 공통 규칙
 
 - **타임아웃**: 599초 (9분 59초)
-- **작업 디렉토리**: 현재 프로젝트 디렉토리
 - **출력 형식**: JSON
 - **권한**: 비대화/자동 승인 모드
+- **병렬 실행**: 독립 작업은 여러 에이전트를 동시에 spawn 가능

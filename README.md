@@ -21,6 +21,13 @@
 - **에이전트**: `delegate-runner`
 - **실행기**: `agent.py` (Python 기반)
 
+### official-skills
+
+Anthropic 공식 마켓플레이스의 플러그인/스킬을 설치하는 플러그인입니다.
+
+- **스킬**: `setup-claude-plugins-official` — [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) 플러그인 설치
+- **스킬**: `setup-anthropics-skills` — [anthropics/skills](https://github.com/anthropics/skills) 스킬 설치
+
 ## 시작하기
 
 1. 이 저장소를 클론하거나 플러그인으로 설치합니다.

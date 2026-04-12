@@ -1,0 +1,9 @@
+{
+  "name": "official-skills",
+  "version": "0.0.1",
+  "description": "외부 마켓플레이스의 스킬을 다운로드하고 관리하는 플러그인",
+  "author": {
+    "name": "inchan",
+    "email": "inchan@augmentedwe.com"
+  }
+}
