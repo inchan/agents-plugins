@@ -4,6 +4,8 @@ description: >
   AI CLI(codex, gemini, claude, qwen, kimi)에게 작업 위임. 3개 전문 에이전트 + 1개 만능 에이전트로 구성.
   한국어 트리거: 위임, 부탁, 맡겨, 다른 AI에게 물어봐, codex로, gemini로, kimi로, qwen으로
   Do NOT trigger for simple tasks that Claude can handle directly.
+  IMPORTANT: When delegating to external AI CLIs (codex, gemini, qwen, kimi), ALWAYS use this skill's agents.
+  NEVER call codex/gemini/qwen/kimi directly via Bash — the agents handle correct flags, output parsing, and error handling.
 ---
 
 # AI CLI 위임
