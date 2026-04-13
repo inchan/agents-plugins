@@ -17,14 +17,17 @@ tools: Bash, Read
 ## CLI 명령어
 
 ```bash
-gemini "<prompt>" -o json --yolo
+gemini -p "<prompt>" -o json --yolo
 ```
 
 시스템 프롬프트가 필요한 경우:
 ```bash
 echo "<system prompt>" > /tmp/gemini-system.md
-GEMINI_SYSTEM_MD=/tmp/gemini-system.md gemini "<prompt>" -o json --yolo
+GEMINI_SYSTEM_MD=/tmp/gemini-system.md gemini -p "<prompt>" -o json --yolo
 ```
+
+> **중요**: positional prompt(`gemini "<prompt>"`)는 대화형 모드로 실행됨.
+> 비대화형(headless)에는 반드시 `-p` 플래그를 사용해야 함.
 
 ## 결과 파싱
 
